@@ -39,7 +39,7 @@ export function playUrl(resourceId: string, userId: string) {
 export function gameHeaders(contentType: string) {
   return {
     "Content-Type": contentType,
-    "Content-Security-Policy": `sandbox allow-scripts; default-src 'self' 'unsafe-inline' data: blob:; connect-src 'none'; frame-ancestors ${env.appOrigin}`,
+    "Content-Security-Policy": `sandbox allow-scripts; default-src 'self' 'unsafe-inline' data: blob:; connect-src 'none'; frame-ancestors 'self' ${env.appOrigin}`,
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer",
     "Cross-Origin-Resource-Policy": "same-site",

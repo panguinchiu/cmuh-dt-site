@@ -103,7 +103,7 @@ tests/                 Vitest：authz、計分、白板合併、各 API integrat
 ### 檔案與 HTML 遊戲隔離
 
 - Blob container 為 private；blob key 用 UUID，不用原始檔名。下載一律 `GET /api/resources/:id/download`：伺服器驗權後 302 到 **5 分鐘、唯讀、單一 blob、指定下載檔名** 的 SAS URL；不可見或不存在一律 404。
-- HTML 遊戲在 `<iframe sandbox="allow-scripts" referrerpolicy="no-referrer">` 中執行（不給 allow-same-origin／top-navigation／popups／forms），內容由 `/play/:id/<token>/*` 從 Blob 串流，回應帶 `Content-Security-Policy: sandbox allow-scripts; default-src 'self' 'unsafe-inline' data: blob:; connect-src 'none'; frame-ancestors <APP_ORIGIN>`，且不回傳 Set-Cookie。遊戲是 opaque origin，讀不到主站 cookie、storage、DOM，也不能發網路請求。
+- HTML 遊戲在 `<iframe sandbox="allow-scripts" referrerpolicy="no-referrer">` 中執行（不給 allow-same-origin／top-navigation／popups／forms），內容由 `/play/:id/<token>/*` 從 Blob 串流，回應帶 `Content-Security-Policy: sandbox allow-scripts; default-src 'self' 'unsafe-inline' data: blob:; connect-src 'none'; frame-ancestors 'self' <APP_ORIGIN>`，且不回傳 Set-Cookie。遊戲是 opaque origin，讀不到主站 cookie、storage、DOM，也不能發網路請求。
 - 因 sandbox 內的子資源請求不帶 cookie，`/play` 以路徑上的短效 HMAC token（3 小時）授權，伺服器每次請求仍重驗使用者是否啟用與可見範圍。
 - 正式環境建議設定 `GAME_ORIGIN` 為獨立 hostname（例如 App Service 第二個自訂網域）；未設定時走同站 `/play`，opaque origin 已足以隔離。
 
