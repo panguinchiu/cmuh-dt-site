@@ -88,10 +88,10 @@ export function Shell({
             </span>
           </div>
           <div className="who">
-            <span>
+            <Link href="/account" className="who-name" title="我的帳號（email、改密碼）">
               {user.name}
               {user.title ? <span className="badge accent" style={{ marginLeft: "calc(6px * var(--z))" }}>{user.title}</span> : null}
-            </span>
+            </Link>
             <span className="badge">{isI ? "講師" : user.groupName}</span>
             <SizeToggle />
             <ThemeToggle />

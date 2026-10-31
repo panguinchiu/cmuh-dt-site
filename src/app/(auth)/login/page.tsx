@@ -16,8 +16,8 @@ export default async function LoginPage() {
   ]);
   return (
     <LoginFlow
-      groups={groups.map((g) => ({ id: g.id, name: g.name, users: g.users.map((u) => ({ id: u.id, name: u.name, title: u.title })) }))}
-      instructors={instructors.map((u) => ({ id: u.id, name: u.name, title: null }))}
+      groups={groups.map((g) => ({ id: g.id, name: g.name, users: g.users.map((u) => ({ id: u.id, name: u.name, title: u.title, hasPassword: !!u.passwordHash })) }))}
+      instructors={instructors.map((u) => ({ id: u.id, name: u.name, title: null, hasPassword: !!u.passwordHash }))}
     />
   );
 }

@@ -1,19 +1,19 @@
 /**
  * npm run seed（idempotent）
- * - 新建立的組別會隨機產生 4 碼代碼；新建立的講師帳號用 INSTRUCTOR_INITIAL_PASSWORD 或隨機密碼
- * - 產生的代碼/密碼只印在 console 一次，並寫入 .seed-output.local.txt（已 gitignore）
+ * - 所有人第一次登入時用「設計思考課程通關密碼」自行設定密碼；seed 不建立任何個人密碼
+ * - 通關密碼：COURSE_PASSPHRASE，未設定則隨機產生；只在第一次設定時印在 console 一次並寫入 .seed-output.local.txt（已 gitignore）
  * - 已存在的資料不覆寫（講師在後台的修改會保留）
  */
-import { randomInt, randomBytes } from "node:crypto";
+import { randomInt } from "node:crypto";
 
 // 本機讀 .env（不覆寫已存在的環境變數；正式環境用 App Settings，沒有 .env 也沒關係）
 try {
   process.loadEnvFile(".env");
 } catch {}
 import { appendFileSync } from "node:fs";
-import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 import { ensureSegmentPages } from "../src/lib/boards";
+import { setCoursePass } from "../src/lib/passwords";
 
 const db = new PrismaClient();
 
@@ -42,18 +42,13 @@ const AGENDA = [
 ];
 
 const out: string[] = [];
-const code4 = () => String(randomInt(0, 10000)).padStart(4, "0");
 
 async function main() {
   // 組別＋白板
   const groupIds: string[] = [];
   for (const [i, g] of GROUPS.entries()) {
     let group = await db.group.findUnique({ where: { name: g.name } });
-    if (!group) {
-      const code = code4();
-      group = await db.group.create({ data: { name: g.name, sortOrder: i + 1, codeHash: await bcrypt.hash(code, 10) } });
-      out.push(`${g.name} 組別代碼：${code}`);
-    }
+    if (!group) group = await db.group.create({ data: { name: g.name, sortOrder: i + 1 } });
     groupIds.push(group.id);
     const board = await db.board.upsert({ where: { groupId: group.id }, update: {}, create: { groupId: group.id } });
     // 各課程段落的白板版本（定義問題、發想與收斂、第一個未來解方、修正原型）
@@ -69,15 +64,10 @@ async function main() {
     }
   }
 
-  // 講師
-  const envPw = process.env.INSTRUCTOR_INITIAL_PASSWORD;
+  // 講師（不設密碼，第一次登入自行設定）
   for (const [i, name] of INSTRUCTORS.entries()) {
     const exists = await db.user.findUnique({ where: { role_name: { role: "instructor", name } } });
-    if (!exists) {
-      const pw = envPw || randomBytes(6).toString("base64url");
-      await db.user.create({ data: { name, role: "instructor", passwordHash: await bcrypt.hash(pw, 10), sortOrder: i + 1 } });
-      out.push(envPw ? `講師 ${name}：使用 INSTRUCTOR_INITIAL_PASSWORD` : `講師 ${name} 初始密碼：${pw}`);
-    }
+    if (!exists) await db.user.create({ data: { name, role: "instructor", sortOrder: i + 1 } });
   }
 
   // 議程：同步成 AGENDA（同標題保留 id 並更新排序；不在清單內的舊段落刪除，不會重複新增）
@@ -99,7 +89,12 @@ async function main() {
     await db.agendaItem.deleteMany({ where: { id: { in: stale } } });
     console.log(`議程：刪除 ${stale.length} 個舊段落`);
   }
-  await db.appState.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
+  const state = await db.appState.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
+  if (!state.coursePassHash) {
+    const pass = process.env.COURSE_PASSPHRASE?.trim() || `dt${String(randomInt(0, 10000)).padStart(4, "0")}`;
+    await setCoursePass(pass);
+    out.push(process.env.COURSE_PASSPHRASE ? "課程通關密碼：使用 COURSE_PASSPHRASE" : `課程通關密碼：${pass}`);
+  }
 
   // 賽局：A 對局 第一組(內科) vs 第二組(外科)；B 對局 第三組(內科) vs 第四組(外科)
   const game = await db.game.upsert({
@@ -130,9 +125,9 @@ async function main() {
     const block = `\n=== seed ${new Date().toISOString()} ===\n${out.join("\n")}\n`;
     appendFileSync(".seed-output.local.txt", block);
     console.log(block);
-    console.log("（以上代碼/密碼只顯示這一次，已另存 .seed-output.local.txt，請勿 commit）");
+    console.log("（以上只顯示這一次，已另存 .seed-output.local.txt，請勿 commit；講師可在管理頁改通關密碼）");
   } else {
-    console.log("seed 完成：資料已存在，未產生新代碼/密碼");
+    console.log("seed 完成：資料已存在，未產生新的通關密碼");
   }
 }
 

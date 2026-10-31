@@ -43,9 +43,7 @@ npm run seed                # 4 組、16 位學員、4 位講師、4 塊白板�
 npm run dev                 # http://localhost:3000（custom server：Next.js + WebSocket /ws）
 ```
 
-`npm run seed` 會把**新產生的**組別代碼（4 碼）與講師初始密碼印在 console **一次**，並附加寫入 `.seed-output.local.txt`（已 gitignore，請勿 commit、用完即刪）。seed 可重跑（idempotent）：已存在的組別、帳號不會重產代碼或覆寫；議程會同步回預設 11 段（多出的段落會被刪除），**上課期間請勿重跑 seed**。
-
-若設定 `INSTRUCTOR_INITIAL_PASSWORD`，新建講師帳號使用該密碼；否則每位講師隨機產生。
+`npm run seed` 不建立任何個人密碼；第一次執行時會設定「設計思考課程通關密碼」（`COURSE_PASSPHRASE`，未設定則隨機產生），只在 console 印**一次**並附加寫入 `.seed-output.local.txt`（已 gitignore，請勿 commit、用完即刪）。seed 可重跑（idempotent）：已存在的帳號與通關密碼不會被覆寫；議程會同步回預設 11 段（多出的段落會被刪除），**上課期間請勿重跑 seed**。
 
 ### 測試與檢查
 
@@ -61,12 +59,17 @@ npm run typecheck && npm run lint && npm test
 
 | 角色 | 登入方式 |
 |---|---|
-| 學員 | 選組別 → 選名字 → 輸入該組 4 位數字組別代碼 |
-| 講師（廖家德、范硯平、邱瓊玉、吳宛儒，權限相同） | 選名字 → 密碼 |
+| 學員 | 選組別 → 選名字 → 個人密碼 |
+| 講師（廖家德、范硯平、邱瓊玉、吳宛儒，權限相同） | 選名字 → 個人密碼 |
 
-- 代碼與密碼只存 bcrypt hash；登入失敗每「IP＋帳號」5 分鐘內最多 5 次。
+- **第一次登入**：輸入講師公布的「設計思考課程通關密碼」，自行設定個人密碼（至少 6 碼）並留下 email。設定過的帳號不能再用通關密碼覆蓋。
+- **忘記密碼**：登入頁按「忘記密碼」。
+  - 有 email 且已設定寄信（`SMTP_USER`／`SMTP_PASS`）→ 由寄件帳號（預設 chiu@theoneai.com.tw，Google Workspace）寄出 30 分鐘內有效、只能用一次的重設連結；連結網址以 `APP_ORIGIN` 為準。
+  - 否則 → 向講師提出申請，講師在管理頁「核准重設」後，對方用課程通關密碼重新設定。
+  - SMTP_PASS 請用寄件帳號的 Google 應用程式密碼（帳號需開啟兩步驟驗證），只放在 `.env`／App Settings。
+- 密碼、通關密碼只存 bcrypt hash；重設 token 只存 HMAC。登入、通關密碼、忘記密碼都有「IP（＋帳號）」5 分鐘限流。
 - session 存在資料庫（cookie 只放隨機 token，DB 存其 HMAC），httpOnly、SameSite=Lax、12 小時；`APP_ORIGIN` 為 https 時加 Secure。
-- 管理頁：講師可改學員姓名／標籤（如「副院長」）／換組／新增／停用、重設組別代碼（新代碼只顯示一次）、改自己的密碼、重設其他講師密碼；換組或停用會讓該學員重新登入。
+- 管理頁：講師可改課程通關密碼、處理忘記密碼申請、改學員姓名／標籤（如「副院長」）／email／換組／新增／停用、重設任何人的密碼；每個人可在右上角姓名（我的帳號）改自己的 email 與密碼。
 
 ## 功能
 
@@ -119,7 +122,7 @@ tests/                 Vitest：authz、計分、白板合併、各 API integrat
 2. **GitHub Actions**（`.github/workflows/deploy.yml`）：push 到 main 或手動觸發 → `npm ci`、typecheck、lint、test（CI 內建 Postgres）、build → 打包（含 production node_modules）→ `azure/webapps-deploy`。
    - Secrets：`AZURE_CLIENT_ID`、`AZURE_TENANT_ID`、`AZURE_SUBSCRIPTION_ID`（`azure/login` OIDC federated credential，在 Entra ID 的 App registration 加上 GitHub federated credential，並授予該 Web App 的 Contributor）；若要由 CI 跑 migration 另需 `DATABASE_URL`。
    - Variables：`AZURE_WEBAPP_NAME`；`RUN_MIGRATIONS_FROM_CI=true`（需 Postgres 防火牆允許 GitHub runner）。
-3. **第一次部署後**：`az webapp ssh -g <rg> -n <app>`，在容器內執行 `npx prisma migrate deploy && npm run seed:prod`，記下印出的組別代碼與講師密碼。
+3. **第一次部署後**：`az webapp ssh -g <rg> -n <app>`，在容器內執行 `npx prisma migrate deploy && npm run seed:prod`，記下印出的課程通關密碼。
 
 正式環境的 secrets 只放在 App Settings／GitHub Secrets，不進 git。
 

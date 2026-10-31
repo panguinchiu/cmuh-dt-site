@@ -30,7 +30,7 @@ GAME_ORIGIN="${GAME_ORIGIN:-}"
 run() {
   # 印出時遮蔽密碼與金鑰
   local shown="$*"
-  for s in "${AZ_PG_PASSWORD:-}" "${SESSION_SECRET:-}" "${INSTRUCTOR_INITIAL_PASSWORD:-}" "${STORAGE_CONN:-}"; do
+  for s in "${AZ_PG_PASSWORD:-}" "${SESSION_SECRET:-}" "${COURSE_PASSPHRASE:-}" "${SMTP_PASS:-}" "${STORAGE_CONN:-}"; do
     [[ -n "$s" ]] && shown="${shown//"$s"/***}"
   done
   echo "+ $shown"
@@ -83,7 +83,8 @@ run az webapp config appsettings set -g "$RG" -n "$APP" --settings \
   "'DATABASE_URL=$DATABASE_URL'" "'SESSION_SECRET=${SESSION_SECRET:-<SESSION_SECRET>}'" \
   "'AZURE_STORAGE_CONNECTION_STRING=$STORAGE_CONN'" "'AZURE_STORAGE_CONTAINER=$CONTAINER'" \
   "'APP_ORIGIN=$APP_ORIGIN'" "'GAME_ORIGIN=$GAME_ORIGIN'" \
-  ${INSTRUCTOR_INITIAL_PASSWORD:+"'INSTRUCTOR_INITIAL_PASSWORD=$INSTRUCTOR_INITIAL_PASSWORD'"}
+  ${COURSE_PASSPHRASE:+"'COURSE_PASSPHRASE=$COURSE_PASSPHRASE'"} \
+  ${SMTP_PASS:+"'SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}'" "'SMTP_PORT=${SMTP_PORT:-465}'" "'SMTP_USER=${SMTP_USER:-chiu@theoneai.com.tw}'" "'SMTP_PASS=$SMTP_PASS'" "'MAIL_FROM=${MAIL_FROM:-設計思考工作坊 <chiu@theoneai.com.tw>}'"}
 
 echo "== 7.（選填）GAME_ORIGIN 第二個 hostname =="
 if [[ -n "${AZ_GAME_HOSTNAME:-}" ]]; then
@@ -97,4 +98,4 @@ fi
 
 echo
 echo "完成後：用 GitHub Actions（.github/workflows/deploy.yml）部署程式碼，"
-echo "再以 az webapp ssh 進入容器執行一次：npx prisma migrate deploy && npm run seed:prod"
+echo "再以 az webapp ssh 進入容器執行一次：npx prisma migrate deploy && npm run seed:prod（記下印出的課程通關密碼）"

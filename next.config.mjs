@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  serverExternalPackages: ["@prisma/client", "bcryptjs", "@azure/storage-blob"],
+  serverExternalPackages: ["@prisma/client", "bcryptjs", "@azure/storage-blob", "nodemailer"],
   turbopack: { root: fileURLToPath(new URL(".", import.meta.url)) },
 };
 

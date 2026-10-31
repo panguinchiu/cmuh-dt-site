@@ -3,6 +3,7 @@ import { requirePageUser } from "@/lib/current-user";
 import { listAgenda } from "@/lib/agenda";
 import { listVisibleResources, publicResource } from "@/lib/resources";
 import { ResourceList } from "@/components/ResourceList";
+import { HeroVisual } from "@/components/HeroVisual";
 
 const no = (n: number) => String(n).padStart(2, "0");
 
@@ -15,8 +16,49 @@ export default async function Home() {
 
   return (
     <>
-      <div className="kicker">今日議程</div>
-      <h1>{isI ? `${user.name} 老師，您好` : `${user.name}，歡迎`}</h1>
+      <section className="hero">
+        <div>
+          <span className="pill">設計思考工作坊 · 不含真實病人資料</span>
+          <h1>
+            從臨床教學的問題，
+            <br />
+            走到可測試的原型。
+          </h1>
+          <p className="lead">
+            {isI ? `${user.name} 老師您好。` : `${user.name}，歡迎。`}
+            今天四組各自在共編白板上定義問題、發想與收斂、提出第一個未來解方，再修正原型；中間穿插加護病房床位賽局。
+          </p>
+          <div className="actions">
+            {isI ? (
+              <Link className="btn primary" href="/overview">
+                前往白板總覽　→
+              </Link>
+            ) : (
+              <Link className="btn primary" href="/board">
+                進入我的白板　→
+              </Link>
+            )}
+            <Link className="btn" href="/resources">
+              資源庫
+            </Link>
+          </div>
+          <div className="features">
+            <div>
+              <h4>白板</h4>
+              <p>每組一塊即時共編，課程段落各有版本，可互相複製。</p>
+            </div>
+            <div>
+              <h4>賽局</h4>
+              <p>內科隊與外科隊共用加護病房床位，八個月的每月抉擇。</p>
+            </div>
+            <div>
+              <h4>資源</h4>
+              <p>講義、連結與小遊戲，依段落與組別開放。</p>
+            </div>
+          </div>
+        </div>
+        <HeroVisual no={current ? no(current.no) : null} title={current?.title ?? null} />
+      </section>
 
       <div className="grid c2" style={{ alignItems: "start" }}>
         <section className="card">
@@ -36,20 +78,6 @@ export default async function Home() {
           ) : (
             <p className="muted">講師尚未開始今天的課程。</p>
           )}
-          <div className="row" style={{ marginTop: "calc(18px * var(--z))" }}>
-            {isI ? (
-              <Link className="btn primary" href="/overview">
-                前往白板總覽
-              </Link>
-            ) : (
-              <Link className="btn primary" href="/board">
-                進入我的白板
-              </Link>
-            )}
-            <Link className="btn" href="/resources">
-              資源庫
-            </Link>
-          </div>
         </section>
 
         <section className="card">

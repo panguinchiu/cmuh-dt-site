@@ -10,12 +10,13 @@ export async function resetDb() {
   await db.$executeRawUnsafe(`TRUNCATE ${tables.map((t) => `"${t.tablename}"`).join(", ")} RESTART IDENTITY CASCADE`);
 }
 
+export const COURSE_PASS = "設計思考2026";
+
 /** 基本 fixture：兩組各一位學員、一位講師、三個議程段落、一塊白板/組 */
 export async function seedFixture() {
   await resetDb();
-  const codeHash = await bcrypt.hash("1234", 4);
-  const g1 = await db.group.create({ data: { name: "第一組", sortOrder: 1, codeHash } });
-  const g2 = await db.group.create({ data: { name: "第二組", sortOrder: 2, codeHash } });
+  const g1 = await db.group.create({ data: { name: "第一組", sortOrder: 1 } });
+  const g2 = await db.group.create({ data: { name: "第二組", sortOrder: 2 } });
   const s1 = await db.user.create({ data: { name: "學員甲", role: "student", groupId: g1.id } });
   const s2 = await db.user.create({ data: { name: "學員乙", role: "student", groupId: g2.id } });
   const ins = await db.user.create({ data: { name: "講師丙", role: "instructor", passwordHash: await bcrypt.hash("pw-123456", 4) } });
@@ -25,7 +26,7 @@ export async function seedFixture() {
   for (const [i, title] of ["段落一", "段落二", "段落三"].entries()) {
     agenda.push(await db.agendaItem.create({ data: { title, sortOrder: i + 1 } }));
   }
-  await db.appState.create({ data: { id: 1 } });
+  await db.appState.create({ data: { id: 1, coursePassHash: await bcrypt.hash(COURSE_PASS, 4) } });
   return { g1, g2, s1, s2, ins, b1, b2, agenda };
 }
 

@@ -37,7 +37,6 @@ model Group {
   id        String   @id @default(uuid())
   name      String   @unique
   sortOrder Int
-  codeHash  String
   users     User[]
   board     Board?
   resources ResourceGroup[]
@@ -52,7 +51,15 @@ model User {
   groupId      String?
   group        Group?    @relation(fields: [groupId], references: [id])
   title        String?
+  // 每個人（學員與講師）第一次登入時用課程通關密碼自行設定；null＝尚未設定
   passwordHash String?
+  // 忘記密碼信的收件 email（第一次登入時填寫）
+  email        String?
+  // 忘記密碼：信中重設連結的 token（只存 hash）與期限
+  resetTokenHash      String?
+  resetTokenExpiresAt DateTime?
+  // 忘記密碼（沒有 email 或寄信未設定時）：向講師提出申請的時間，講師核准或忽略後清除
+  resetRequestedAt DateTime?
   active       Boolean   @default(true)
   sortOrder    Int       @default(0)
   createdAt    DateTime  @default(now())
@@ -84,6 +91,8 @@ model AgendaItem {
 model AppState {
   id                   Int     @id @default(1)
   currentAgendaItemId  String?
+  // 設計思考課程通關密碼（bcrypt）；第一次登入設定個人密碼時使用
+  coursePassHash       String?
 }
 
 model Board {

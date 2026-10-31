@@ -18,7 +18,7 @@ const put = (cookie: string | undefined, n: number, side: string, choice: string
 
 beforeEach(async () => {
   f = await seedFixture();
-  const g3 = await db.group.create({ data: { name: "第三組", sortOrder: 3, codeHash: "x" } });
+  const g3 = await db.group.create({ data: { name: "第三組", sortOrder: 3 } });
   const s3 = await db.user.create({ data: { name: "學員丁", role: "student", groupId: g3.id } });
   const game = await db.game.create({ data: { slug, title: "加護病房床位的每月抉擇" } });
   const m = await db.gameMatch.create({

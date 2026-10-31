@@ -6,6 +6,7 @@ import { isInstructor } from "@/lib/authz";
 import { listAgenda } from "@/lib/agenda";
 import { AgendaEditor } from "@/components/AgendaEditor";
 import { AdminPeople } from "@/components/AdminPeople";
+import { mailConfigured } from "@/lib/mail";
 
 export default async function AdminPage() {
   const user = await requirePageUser();
@@ -22,7 +23,7 @@ export default async function AdminPage() {
       <nav className="row small" style={{ marginBottom: "calc(16px * var(--z))" }}>
         <a href="#agenda">議程</a>
         <a href="#students">學員</a>
-        <a href="#codes">組別代碼</a>
+        <a href="#passphrase">通關密碼</a>
         <a href="#instructors">講師</a>
         <Link href="/game/dashboard">賽局設定（配對／重置／公開）</Link>
       </nav>
@@ -33,8 +34,25 @@ export default async function AdminPage() {
       </section>
       <AdminPeople
         groups={groups}
-        students={students.map((s) => ({ id: s.id, name: s.name, title: s.title, groupId: s.groupId, active: s.active }))}
-        instructors={instructors.map((i) => ({ id: i.id, name: i.name, isMe: i.id === user.id }))}
+        mailReady={mailConfigured()}
+        students={students.map((s) => ({
+          id: s.id,
+          name: s.name,
+          title: s.title,
+          groupId: s.groupId,
+          active: s.active,
+          email: s.email,
+          hasPassword: !!s.passwordHash,
+          resetRequested: !!s.resetRequestedAt,
+        }))}
+        instructors={instructors.map((i) => ({
+          id: i.id,
+          name: i.name,
+          isMe: i.id === user.id,
+          email: i.email,
+          hasPassword: !!i.passwordHash,
+          resetRequested: !!i.resetRequestedAt,
+        }))}
       />
     </>
   );

@@ -4,6 +4,7 @@ import { requireInstructor } from "@/lib/authz";
 import { HttpError, json, notFound, route } from "@/lib/http";
 import { userFromRequest } from "@/lib/session";
 import { uniqueName } from "@/lib/admin";
+import { emailSchema } from "@/lib/passwords";
 import { audit } from "@/lib/audit";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -13,10 +14,11 @@ const body = z
     groupId: z.string().uuid().optional(),
     title: z.string().trim().max(20).nullable().optional(),
     active: z.boolean().optional(),
+    email: z.union([emailSchema, z.literal("")]).optional(),
   })
   .refine((v) => Object.keys(v).length > 0, "沒有要更新的欄位");
 
-/** 改名、換組、改職稱、停用/啟用（停用時立即登出該學員） */
+/** 改名、換組、改職稱、改 email、停用/啟用（停用時立即登出該學員） */
 export const PATCH = route(async (req: Request, ctx: Ctx) => {
   const me = requireInstructor(await userFromRequest(req));
   const id = z.string().uuid().safeParse((await ctx.params).id);
@@ -33,6 +35,7 @@ export const PATCH = route(async (req: Request, ctx: Ctx) => {
         ...(input.groupId !== undefined ? { groupId: input.groupId } : {}),
         ...(input.title !== undefined ? { title: input.title || null } : {}),
         ...(input.active !== undefined ? { active: input.active } : {}),
+        ...(input.email !== undefined ? { email: input.email || null } : {}),
       },
     })
     .catch(uniqueName);
