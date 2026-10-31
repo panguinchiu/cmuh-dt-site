@@ -103,8 +103,14 @@ export function placeBeside(target: El[], incoming: El[], gap = 120): El[] {
 const locks = new Map<string, Promise<unknown>>();
 function withLock<T>(boardId: string, fn: () => Promise<T>): Promise<T> {
   const prev = locks.get(boardId) ?? Promise.resolve();
-  const next = prev.catch(() => {}).then(fn);
-  locks.set(boardId, next.finally(() => locks.get(boardId) === next && locks.delete(boardId)));
+  const next = prev.then(fn);
+  // 鎖鏈上只放「不會 reject」的版本，錯誤只交給呼叫端處理
+  const tail: Promise<void> = next.then(
+    () => {},
+    () => {},
+  );
+  locks.set(boardId, tail);
+  void tail.then(() => locks.get(boardId) === tail && locks.delete(boardId));
   return next;
 }
 
