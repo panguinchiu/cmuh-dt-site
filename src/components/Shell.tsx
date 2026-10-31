@@ -21,7 +21,7 @@ export function Shell({
   children,
 }: {
   user: ShellUser;
-  current: { seq: string; time: string; title: string } | null;
+  current: { no: number; title: string } | null;
   gamePublished: boolean;
   children: React.ReactNode;
 }) {
@@ -32,6 +32,7 @@ export function Shell({
 
   // 目前時段 / 賽局公開狀態 變更 → 重新抓 server component
   useWsEvent("agenda:current", () => router.refresh());
+  useWsEvent("agenda:update", () => router.refresh());
   useWsEvent("game:publish", () => router.refresh());
 
   const links: { href: string; label: string; show: boolean }[] = [
@@ -74,11 +75,11 @@ export function Shell({
             選單
           </button>
           <div className="now">
-            <span className="lab">目前時段</span>
+            <span className="lab">目前段落</span>
             <span className="val">
               {current ? (
                 <>
-                  <span className="mono">{current.time}</span>　{current.title}
+                  <span className="mono">{String(current.no).padStart(2, "0")}</span>　{current.title}
                 </>
               ) : (
                 <span className="muted">尚未開始</span>

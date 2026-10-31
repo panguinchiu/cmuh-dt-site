@@ -178,10 +178,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 16px; }
 
 /* agenda */
 .agenda { list-style: none; padding: 0; margin: 0; }
-.agenda li { display: grid; grid-template-columns: 44px 64px 1fr; gap: 10px; padding: 10px 6px; border-bottom: 1px solid var(--line); align-items: baseline; }
-.agenda li .seq, .agenda li .tm { font-family: var(--mono); color: var(--muted); font-size: 15px; }
+.agenda li { display: grid; grid-template-columns: 44px 1fr; gap: 10px; padding: 10px 6px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.agenda li .seq { font-family: var(--mono); color: var(--muted); font-size: 15px; }
 .agenda li.cur { background: var(--accent-soft); border-radius: var(--radius); }
-.agenda li.cur .tm, .agenda li.cur .seq { color: var(--accent); }
+.agenda li.cur .seq { color: var(--accent); }
 
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--muted); }
 .dot.on { background: var(--accent); }

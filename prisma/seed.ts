@@ -20,19 +20,19 @@ const GROUPS: { name: string; members: (string | { name: string; title: string }
 
 const INSTRUCTORS = ["廖家德", "范硯平", "邱瓊玉", "吳宛儒"];
 
-const AGENDA: [string, string, string][] = [
-  ["01", "10:00", "定義問題"],
-  ["02", "10:30", "發想與收斂"],
-  ["03", "11:00", "第一個未來解方"],
-  ["04", "11:30", "從一句需求到測試站（講師：廖家德醫師）"],
-  ["05", "12:30", "午餐＋動手發布"],
-  ["06", "13:30", "當人人都能部署（沙盒轉向工具平台）"],
-  ["07", "14:00", "牌桌遊戲"],
-  ["08", "14:30", "加護病房床位的每月抉擇（賽局）"],
-  ["09", "15:30", "教學部盃桌球策略遊戲"],
-  ["10", "16:30", "黑馬來了"],
-  ["11", "16:45", "修正原型"],
-  ["12", "17:15", "成果發表與總結"],
+// 議程只有順序與標題，不存時間
+const AGENDA = [
+  "定義問題",
+  "發想與收斂",
+  "第一個未來解方",
+  "從一句需求到測試站（講師：廖家德醫師）",
+  "午餐＋動手發布",
+  "當人人都能部署（沙盒轉向工具平台）",
+  "牌桌遊戲",
+  "加護病房床位的每月抉擇（賽局）",
+  "黑馬來了",
+  "修正原型",
+  "成果發表與總結",
 ];
 
 const out: string[] = [];
@@ -72,11 +72,24 @@ async function main() {
     }
   }
 
-  // 議程
-  if ((await db.agendaItem.count()) === 0) {
-    await db.agendaItem.createMany({
-      data: AGENDA.map(([seq, time, title], i) => ({ seq, time, title, sortOrder: i + 1 })),
-    });
+  // 議程：同步成 AGENDA（同標題保留 id 並更新排序；不在清單內的舊段落刪除，不會重複新增）
+  const existing = await db.agendaItem.findMany();
+  const keep = new Set<string>();
+  for (const [i, title] of AGENDA.entries()) {
+    const hit = existing.find((e) => e.title === title && !keep.has(e.id));
+    if (hit) {
+      keep.add(hit.id);
+      await db.agendaItem.update({ where: { id: hit.id }, data: { sortOrder: i + 1 } });
+    } else {
+      const created = await db.agendaItem.create({ data: { title, sortOrder: i + 1 } });
+      keep.add(created.id);
+    }
+  }
+  const stale = existing.filter((e) => !keep.has(e.id)).map((e) => e.id);
+  if (stale.length) {
+    await db.appState.updateMany({ where: { currentAgendaItemId: { in: stale } }, data: { currentAgendaItemId: null } });
+    await db.agendaItem.deleteMany({ where: { id: { in: stale } } });
+    console.log(`議程：刪除 ${stale.length} 個舊段落`);
   }
   await db.appState.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
 

@@ -15,7 +15,7 @@
 2. 每組有一塊**即時共編白板**（Excalidraw），可貼便利貼、手繪、打字，自動存檔、存版本、匯出 PNG/PDF。
 3. 講師上傳**資源庫**（檔案、外部連結/遊戲網站、HTML 小遊戲），並控制誰看得到（伺服器端強制）。
 4. 玩**「加護病房床位的每月抉擇」**賽局：學員頁作答寫入 API，講師儀表板即時看到所有組，講師可切換「公開給學員」。
-5. 講師**總覽頁**：4 組白板即時縮圖、可進入任一白板、依當日議程切換「目前時段」。
+5. 講師**總覽頁**：4 組白板即時縮圖、可進入任一白板、依當日議程切換「目前段落」。
 
 成功標準：明天現場 4 組＋4 位講師同時使用不卡、不掉資料、權限不漏。寧可功能少，不可不穩。
 
@@ -41,26 +41,27 @@
 ## 3. 功能規格
 
 ### 3.1 版面
-- 左側 nav：首頁（目前時段＋今日議程）、我的白板（學員）／白板總覽（講師）、資源庫、賽局、（講師）管理。
-- 頂部顯示：目前使用者、組別、目前時段、深/淺色切換、登出。
+- 左側 nav：首頁（目前段落＋今日議程）、我的白板（學員）／白板總覽（講師）、資源庫、賽局、（講師）管理。
+- 頂部顯示：目前使用者、組別、目前段落、深/淺色切換、登出。
 - 大字、少按鈕，手機與平板可用（白板頁以平板/筆電為主）。
 
-### 3.2 今日議程與「目前時段」
-Seed 以下 10 個段落（講師在總覽頁一鍵切換「目前時段」，所有人首頁即時更新，可透過同一條 websocket 廣播）：
-| # | 時間 | 段落 |
-|---|---|---|
-| 01 | 10:00 | 定義問題 |
-| 02 | 10:30 | 發想與收斂 |
-| 03 | 11:00 | 第一個未來解方 |
-| 04 | 11:30 | 從一句需求到測試站（講師：廖家德醫師） |
-| 05 | 12:30 | 午餐＋動手發布 |
-| 06 | 13:30 | 當人人都能部署（沙盒轉向工具平台） |
-| 07 | 14:00 | 牌桌遊戲 |
-| 08 | 14:30 | 加護病房床位的每月抉擇（賽局） |
-| 09 | 15:30 | 教學部盃桌球策略遊戲 |
-| 10 | 16:30 | 黑馬來了 |
+### 3.2 今日議程與「目前段落」
+網站上不顯示任何上課時間，議程只有段落順序與標題。Seed 以下 11 個正式段落（講師在總覽頁一鍵切換「目前段落」，所有人首頁即時更新，透過同一條 websocket 廣播；不依時間自動切換）：
+| # | 段落 |
+|---|---|
+| 01 | 定義問題 |
+| 02 | 發想與收斂 |
+| 03 | 第一個未來解方 |
+| 04 | 從一句需求到測試站（講師：廖家德醫師） |
+| 05 | 午餐＋動手發布 |
+| 06 | 當人人都能部署（沙盒轉向工具平台） |
+| 07 | 牌桌遊戲 |
+| 08 | 加護病房床位的每月抉擇（賽局） |
+| 09 | 黑馬來了 |
+| 10 | 修正原型 |
+| 11 | 成果發表與總結 |
 
-另外 seed 兩筆收尾段落（可選、排在後面）：`11 16:45 修正原型`、`12 17:15 成果發表與總結`。段落可在後台改名、改時間、排序。每個段落可綁定資源（選填），首頁顯示「目前時段＋相關資源」。
+講師後台可新增、刪除、改標題、調整排序（伺服器端驗證僅講師）；改動後經 websocket 廣播。「目前段落」若指向被刪除的段落則清空。每個段落可綁定資源（選填），首頁顯示「目前段落＋相關資源」。
 
 ### 3.3 白板（每組一塊，共 4 塊）
 - 使用 **Excalidraw**（`@excalidraw/excalidraw`，MIT）。**保留 MIT license 聲明**（`THIRD_PARTY_NOTICES.md` ＋頁尾「About」連結），**不使用 Excalidraw+、excalidraw.com collab 服務、付費素材或其 library 商店**。
@@ -68,14 +69,14 @@ Seed 以下 10 個段落（講師在總覽頁一鍵切換「目前時段」，�
 - 權限：學員只能編輯自己組的白板；講師可檢視與編輯任一組白板。
 - **即時協作：採用「自架 websocket 的 scene-sync」，不用 Yjs**（理由見 §6.3）。
 - 自動存檔：伺服器端每 30 秒把有變動的 scene 寫入 Postgres（`board.scene` JSONB）；client 斷線重連後先拿伺服器最新 scene 再合併。
-- 「存成版本」按鈕：建立 `board_version` snapshot（可輸入名稱，預設為目前時段名稱＋時間），可列出、預覽、還原（還原前自動再存一版當前狀態）。
+- 「存成版本」按鈕：建立 `board_version` snapshot（可輸入名稱，預設為目前段落名稱＋存檔時刻），可列出、預覽、還原（還原前自動再存一版當前狀態）。
 - 匯出：PNG（`exportToBlob`，白底，2x scale）；PDF（`pdf-lib`，**A3 橫向** 1190.55×841.89 pt，圖片等比置中、留邊，頁首印「第X組 白板｜日期時間」——注意 pdf-lib 標準字型不支援中文，頁首請用 `@pdf-lib/fontkit` 嵌入 Noto Sans TC 子集，或直接把頁首畫進 PNG 再嵌入，選後者較簡單）。
 - 圖片貼入：MVP 允許貼小圖（單檔 ≤ 2MB，存成 Excalidraw files 隨 scene 存 DB；若過大則提示）。
 
 ### 3.4 講師總覽
 - 4 組白板卡片：**即時縮圖**（伺服器收到更新後節流，每 10 秒 client 端以 `exportToSvg` 產生縮圖，或總覽頁直接訂閱 4 個 board 的 scene 並各自 render 一個唯讀小型 Excalidraw/SVG；選 SVG 較省資源）、最後更新時間、線上人數。
 - 點卡片進入該組白板（可編輯）。
-- 「目前時段」切換器（下拉或段落按鈕列）。
+- 「目前段落」切換器（下拉或段落按鈕列）。
 
 ### 3.5 資源庫
 - 講師可新增三種資源：
@@ -112,7 +113,7 @@ Seed 以下 10 個段落（講師在總覽頁一鍵切換「目前時段」，�
 | 賽局作答（寫入回合選擇） | 僅自己組所屬的對局與己方席位 | ✓（可代填/更正） |
 | 讀賽局儀表板（所有組） | 僅當 `game.published = true`，且唯讀 | ✓ |
 | 讀自己對局的分數 | ✓（自己的對局） | ✓ |
-| 切換目前時段、公開開關、管理 | ✗ | ✓ |
+| 切換目前段落、公開開關、管理 | ✗ | ✓ |
 
 函式建議：`canViewResource(user, resource)`、`canEditBoard(user, boardId)`、`canSubmitGameRound(user, match, side)`、`canViewGameDashboard(user, game)`、`requireInstructor(user)`。
 
@@ -126,8 +127,8 @@ Websocket：連線時用 session cookie 驗證身分（upgrade 時讀 cookie 查
 Group        id, name("第一組"..), sortOrder, codeHash
 User         id, name, role(student|instructor), groupId?(student 必填), title?(如「副院長」), passwordHash?(instructor), active, createdAt
 Session      id, userId, expiresAt, createdAt
-AgendaItem   id, seq, time("10:00"), title, note?, sortOrder
-AppState     id=1, currentAgendaItemId?          // 目前時段（singleton）
+AgendaItem   id, title, note?, sortOrder          // 不存時間
+AppState     id=1, currentAgendaItemId?          // 目前段落（singleton）
 Board        id, groupId(unique), scene JSONB, files JSONB, updatedAt, updatedById
 BoardVersion id, boardId, name, scene JSONB, files JSONB, createdById, createdAt
 Resource     id, title, description?, type(file|link|html_game), url?(link), blobKey?(file/game), fileName?, mimeType?, size?,
@@ -141,7 +142,7 @@ AuditLog     id, userId, action, target, meta JSONB, createdAt   // 登入、資
 ```
 Choice enum：`FULL`（全力共援）、`HOLD`（保留一手）、`SELF`（優先自保）。
 
-Seed（`npm run seed`，idempotent）：4 組、16 位學員、4 位講師、4 塊空白板、12 個議程段落（10＋2）、1 個 Game（未公開）、2 個 GameMatch（預設 A 對局：第一組(內科) vs 第二組(外科)；B 對局：第三組(內科) vs 第四組(外科)，講師可改）、每個 match 8 個空回合。
+Seed（`npm run seed`，idempotent）：4 組、16 位學員、4 位講師、4 塊空白板、11 個議程段落（重跑時同步：多餘的舊段落刪除）、1 個 Game（未公開）、2 個 GameMatch（預設 A 對局：第一組(內科) vs 第二組(外科)；B 對局：第三組(內科) vs 第四組(外科)，講師可改）、每個 match 8 個空回合。
 
 ## 6. 技術與架構
 
@@ -260,8 +261,8 @@ API：`GET /api/game/:slug/me`（學員自己的對局）、`PUT /api/game/:slug
 **Step 4 — 賽局**：`game.ts`＋測試、學員頁、儀表板、公開開關、ws 即時更新。
 ✅ 4 個瀏覽器模擬 4 組填完 8 回合，儀表板即時更新、分數與原 HTML 一致；未公開時學員打 dashboard API 得 403；公開後唯讀可見。
 
-**Step 5 — 講師總覽＋議程**：4 組縮圖、進入白板、目前時段切換廣播。
-✅ 學員改白板，總覽縮圖 ≤ 10 秒內更新；切換時段後學員首頁即時變。
+**Step 5 — 講師總覽＋議程**：4 組縮圖、進入白板、目前段落切換廣播。
+✅ 學員改白板，總覽縮圖 ≤ 10 秒內更新；切換段落後學員首頁即時變。
 
 **Step 6 — 資源庫**：上傳（Azurite）、連結、HTML 遊戲 sandbox、四種可見範圍、SAS 下載。
 ✅ 各可見範圍以不同帳號驗證；複製下載連結 5 分鐘後失效；HTML 遊戲內 `document.cookie`、`parent.document` 存取失敗；不可見資源 API 回 404。
@@ -274,7 +275,7 @@ API：`GET /api/game/:slug/me`（學員自己的對局）、`PUT /api/game/:slug
 - [ ] 4 塊白板即時協作、便利貼/手繪/文字可用、30 秒自動存檔、版本、PNG/PDF
 - [ ] 賽局學員作答寫 API、儀表板即時、公開開關有效
 - [ ] 資源庫四種可見範圍伺服器端強制、下載為短效 SAS、HTML 遊戲 sandbox
-- [ ] 總覽縮圖＋目前時段切換
+- [ ] 總覽縮圖＋目前段落切換
 - [ ] authz 與 game 測試全綠
 - [ ] 無 secrets 進 git；README、.env.example、seed、部署腳本齊全
 
