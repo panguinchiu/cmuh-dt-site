@@ -16,7 +16,7 @@
     "seed": "tsx prisma/seed.ts",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "azurite": "azurite --blobHost 127.0.0.1 --blobPort 10000 --location .azurite --silent --loose --skipApiVersionCheck --blobOnly",
+    "azurite": "azurite-blob --blobHost 127.0.0.1 --blobPort 10000 --location .azurite --silent --loose --skipApiVersionCheck",
     "postinstall": "prisma generate && node scripts/copy-excalidraw-assets.mjs"
   },
   "dependencies": {

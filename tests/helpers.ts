@@ -42,4 +42,4 @@ export function req(path: string, init: { method?: string; body?: unknown; cooki
   });
 }
 
-export const params = <T extends Record<string, string>>(p: T) => ({ params: Promise.resolve(p) });
+export const params = <T extends Record<string, string | string[]>>(p: T) => ({ params: Promise.resolve(p) });
