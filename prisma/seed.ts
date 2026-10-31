@@ -13,6 +13,7 @@ try {
 import { appendFileSync } from "node:fs";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { ensureSegmentPages } from "../src/lib/boards";
 
 const db = new PrismaClient();
 
@@ -54,7 +55,9 @@ async function main() {
       out.push(`${g.name} 組別代碼：${code}`);
     }
     groupIds.push(group.id);
-    await db.board.upsert({ where: { groupId: group.id }, update: {}, create: { groupId: group.id } });
+    const board = await db.board.upsert({ where: { groupId: group.id }, update: {}, create: { groupId: group.id } });
+    // 各課程段落的白板版本（定義問題、發想與收斂、第一個未來解方、修正原型）
+    await ensureSegmentPages(board.id);
 
     for (const [j, m] of g.members.entries()) {
       const name = typeof m === "string" ? m : m.name;

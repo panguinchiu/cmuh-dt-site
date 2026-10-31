@@ -131,7 +131,7 @@ export function Overview({ boards, agenda }: { boards: BoardCard[]; agenda: { it
   return (
     <>
       <section className="card">
-        <div className="row" style={{ marginBottom: 10 }}>
+        <div className="row" style={{ marginBottom: "calc(10px * var(--z))" }}>
           <h3 style={{ margin: 0 }}>目前段落</h3>
           <span className="muted small">點一下即切換，所有人首頁即時更新</span>
           <div className="spacer" />
@@ -154,10 +154,10 @@ export function Overview({ boards, agenda }: { boards: BoardCard[]; agenda: { it
           const m = meta[b.boardId];
           return (
             <Link key={b.boardId} href={`/board/${b.boardId}`} className="card board-card">
-              <div className="row" style={{ marginBottom: 10 }}>
+              <div className="row" style={{ marginBottom: "calc(10px * var(--z))" }}>
                 <h3 style={{ margin: 0, color: "var(--text)" }}>{b.groupName}</h3>
                 <span className="badge" title={m?.names?.join("、")}>
-                  <span className={`dot ${m?.online ? "on" : ""}`} style={{ marginRight: 6 }} />
+                  <span className={`dot ${m?.online ? "on" : ""}`} style={{ marginRight: "calc(6px * var(--z))" }} />
                   線上 {m?.online ?? 0}
                 </span>
                 <div className="spacer" />

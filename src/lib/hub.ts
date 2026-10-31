@@ -6,6 +6,8 @@ export interface Hub {
   broadcastAll(msg: object): void;
   /** 白板版本還原：替換記憶體中的 scene 並推給在線者 */
   replaceBoard(boardId: string, elements: unknown[], files: Record<string, unknown>): Promise<void>;
+  /** 把新元素（已換新 id）加到白板並推給在線者 */
+  appendToBoard(boardId: string, elements: unknown[], files: Record<string, unknown>): Promise<void>;
   /** 取得記憶體中最新 scene（尚未 flush 的也算） */
   snapshotBoard(boardId: string): Promise<{ elements: unknown[]; files: Record<string, unknown> } | null>;
 }

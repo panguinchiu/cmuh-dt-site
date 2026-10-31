@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useWsEvent } from "./ws";
 import { ThemeToggle } from "./ThemeToggle";
+import { SizeToggle } from "./SizeToggle";
 import { LogoutButton } from "./LogoutButton";
 
 export interface ShellUser {
@@ -89,9 +90,10 @@ export function Shell({
           <div className="who">
             <span>
               {user.name}
-              {user.title ? <span className="badge accent" style={{ marginLeft: 6 }}>{user.title}</span> : null}
+              {user.title ? <span className="badge accent" style={{ marginLeft: "calc(6px * var(--z))" }}>{user.title}</span> : null}
             </span>
             <span className="badge">{isI ? "講師" : user.groupName}</span>
+            <SizeToggle />
             <ThemeToggle />
             <LogoutButton />
           </div>

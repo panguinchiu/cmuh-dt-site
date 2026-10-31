@@ -19,7 +19,7 @@ export function ResourceList({ items, empty = "目前沒有資源" }: { items: P
     <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
       {items.map((r) => (
         <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--line)" }}>
-          <div className="row" style={{ gap: 8 }}>
+          <div className="row" style={{ gap: "calc(8px * var(--z))" }}>
             <span className="badge">{TYPE_LABEL[r.type]}</span>
             <ResourceLink r={r} />
           </div>

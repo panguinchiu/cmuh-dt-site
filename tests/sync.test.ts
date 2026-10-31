@@ -31,3 +31,19 @@ describe("client 只送有變的元素", () => {
     expect(dataUrlBytes(url)).toBe(300);
   });
 });
+
+import { freeSpot } from "@/components/board/sync";
+import { placeBeside } from "@/lib/boards";
+
+describe("便利貼與複製的擺放", () => {
+  it("中心空著就放中心；被佔就往旁邊找", () => {
+    expect(freeSpot([], 0, 0, 200, 100)).toEqual({ x: -100, y: -50 });
+    const p = freeSpot([{ x: -100, y: -50, width: 200, height: 100 }], 0, 0, 200, 100);
+    expect(p).not.toEqual({ x: -100, y: -50 });
+  });
+  it("加入複製時整批移到目標內容右側", () => {
+    const out = placeBeside([{ id: "t", x: 0, y: 0, width: 100, height: 100 }], [{ id: "s", x: 0, y: 0, width: 50, height: 50 }]);
+    expect(out[0].x).toBe(220);
+    expect(out[0].y).toBe(0);
+  });
+});

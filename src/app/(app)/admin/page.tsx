@@ -19,7 +19,7 @@ export default async function AdminPage() {
   return (
     <>
       <h1>管理</h1>
-      <nav className="row small" style={{ marginBottom: 16 }}>
+      <nav className="row small" style={{ marginBottom: "calc(16px * var(--z))" }}>
         <a href="#agenda">議程</a>
         <a href="#students">學員</a>
         <a href="#codes">組別代碼</a>

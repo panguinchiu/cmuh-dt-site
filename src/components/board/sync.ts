@@ -26,3 +26,24 @@ export const STICKY_COLORS = [
   { key: "green", label: "綠", bg: "#c3f0c8" },
   { key: "blue", label: "藍", bg: "#c5e3ff" },
 ] as const;
+
+type Rect = { x: number; y: number; width: number; height: number; isDeleted?: boolean };
+
+/** 在畫面中心附近找一個不和既有元素重疊的位置（由中心往外一圈圈找） */
+export function freeSpot(elements: readonly Rect[], cx: number, cy: number, w: number, h: number, gap = 24) {
+  const hits = (x: number, y: number) =>
+    elements.some((e) => !e.isDeleted && x < e.x + Math.abs(e.width) + gap && x + w + gap > e.x && y < e.y + Math.abs(e.height) + gap && y + h + gap > e.y);
+  const sx = w + gap;
+  const sy = h + gap;
+  for (let ring = 0; ring <= 6; ring++) {
+    for (let dy = -ring; dy <= ring; dy++) {
+      for (let dx = -ring; dx <= ring; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== ring) continue;
+        const x = cx - w / 2 + dx * sx;
+        const y = cy - h / 2 + dy * sy;
+        if (!hits(x, y)) return { x, y };
+      }
+    }
+  }
+  return { x: cx - w / 2 + 30, y: cy - h / 2 + 30 };
+}

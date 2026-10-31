@@ -23,20 +23,20 @@ export default async function Home() {
           <div className="kicker">目前段落</div>
           {current ? (
             <>
-              <h2 style={{ marginBottom: 4 }}>
+              <h2 style={{ marginBottom: "calc(4px * var(--z))" }}>
                 <span className="mono" style={{ color: "var(--accent)" }}>
                   {no(current.no)}
                 </span>
                 　{current.title}
               </h2>
               {current.note ? <p className="muted">{current.note}</p> : null}
-              <h3 style={{ marginTop: 18 }}>本段落資源</h3>
+              <h3 style={{ marginTop: "calc(18px * var(--z))" }}>本段落資源</h3>
               <ResourceList items={related.map((r) => publicResource(r, isI))} empty="本段落沒有指定資源" />
             </>
           ) : (
             <p className="muted">講師尚未開始今天的課程。</p>
           )}
-          <div className="row" style={{ marginTop: 18 }}>
+          <div className="row" style={{ marginTop: "calc(18px * var(--z))" }}>
             {isI ? (
               <Link className="btn primary" href="/overview">
                 前往白板總覽
@@ -60,7 +60,7 @@ export default async function Home() {
                 <span className="seq">{no(i.no)}</span>
                 <span>
                   {i.title}
-                  {i.id === current?.id ? <span className="badge accent" style={{ marginLeft: 8 }}>進行中</span> : null}
+                  {i.id === current?.id ? <span className="badge accent" style={{ marginLeft: "calc(8px * var(--z))" }}>進行中</span> : null}
                 </span>
               </li>
             ))}

@@ -71,12 +71,12 @@ export function GamePlay({ slug }: { slug: string }) {
               <div className="lab">我方加權累計</div>
             </div>
             <div className="big-num">{m.myTotal}</div>
-            <div className="muted" style={{ marginTop: 8 }}>
+            <div className="muted" style={{ marginTop: "calc(8px * var(--z))" }}>
               對手 {opName}：<b className="mono">{m.opTotal}</b>｜距全程共好上限 {COOP_MAX} 還差 <span className="mono">{Math.max(0, COOP_MAX - m.myTotal)}</span>
             </div>
           </div>
           <div className="spacer" />
-          <div className="grid c3" style={{ minWidth: 420, flex: "0 1 520px" }}>
+          <div className="grid c3" style={{ minWidth: "calc(420px * var(--z))", flex: "0 1 520px" }}>
             <div className="stat">
               <div className="lab">完成回合</div>
               <div className="val">{m.completed} / 8</div>
@@ -91,7 +91,7 @@ export function GamePlay({ slug }: { slug: string }) {
             </div>
           </div>
         </div>
-        <div style={{ marginTop: 18 }}>
+        <div style={{ marginTop: "calc(18px * var(--z))" }}>
           <LineChart
             defect={m.defect}
             series={[
@@ -151,7 +151,7 @@ export function GamePlay({ slug }: { slug: string }) {
                     <td className="num">{row.myPts ?? "—"}</td>
                     <td>
                       ×{row.weight}
-                      {row.weight > 1 ? <span className="badge warn" style={{ marginLeft: 6 }}>加權</span> : null}
+                      {row.weight > 1 ? <span className="badge warn" style={{ marginLeft: "calc(6px * var(--z))" }}>加權</span> : null}
                     </td>
                     <td className="num tone-accent">
                       <b>{row.myCum ?? "—"}</b>

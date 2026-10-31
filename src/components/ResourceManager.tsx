@@ -93,7 +93,7 @@ export function ResourceManager({
 
   return (
     <>
-      <div className="row" style={{ marginBottom: 14 }}>
+      <div className="row" style={{ marginBottom: "calc(14px * var(--z))" }}>
         <button className="btn primary" onClick={() => (setForm({ ...empty }), setFile(null), setErr(""))}>
           新增資源
         </button>
@@ -104,7 +104,7 @@ export function ResourceManager({
         <section className="card">
           <h3>{form.id ? "編輯資源" : "新增資源"}</h3>
           {!form.id && (
-            <div className="row" style={{ marginBottom: 14 }}>
+            <div className="row" style={{ marginBottom: "calc(14px * var(--z))" }}>
               {(["link", "file", "html_game"] as const).map((t) => (
                 <button key={t} className={`btn sm ${form.type === t ? "primary" : ""}`} onClick={() => (set({ type: t }), setFile(null))}>
                   {TYPE_LABEL[t]}
@@ -146,7 +146,7 @@ export function ResourceManager({
                 </select>
               </label>
               {form.visibility === "groups" && (
-                <div className="field row" style={{ gap: 8 }}>
+                <div className="field row" style={{ gap: "calc(8px * var(--z))" }}>
                   {groups.map((g) => (
                     <label key={g.id} className="badge" style={{ padding: "6px 10px", cursor: "pointer" }}>
                       <input type="checkbox" checked={form.groupIds.includes(g.id)} onChange={() => set({ groupIds: toggle(form.groupIds, g.id) })} /> {g.name}
@@ -155,7 +155,7 @@ export function ResourceManager({
                 </div>
               )}
               {form.visibility === "users" && (
-                <div className="field" style={{ maxHeight: 220, overflow: "auto", border: "1px solid var(--line)", borderRadius: 5, padding: 8 }}>
+                <div className="field" style={{ maxHeight: "calc(220px * var(--z))", overflow: "auto", border: "1px solid var(--line)", borderRadius: 5, padding: "calc(8px * var(--z))" }}>
                   {students.map((u) => (
                     <label key={u.id} style={{ display: "block", cursor: "pointer" }}>
                       <input type="checkbox" checked={form.userIds.includes(u.id)} onChange={() => set({ userIds: toggle(form.userIds, u.id) })} /> {u.name}
@@ -225,7 +225,7 @@ export function ResourceManager({
                     </td>
                     <td className="small">{agenda.find((a) => a.id === r.agendaItemId)?.title ?? "—"}</td>
                     <td>
-                      <div className="row" style={{ gap: 6, flexWrap: "nowrap" }}>
+                      <div className="row" style={{ gap: "calc(6px * var(--z))", flexWrap: "nowrap" }}>
                         <button
                           className="btn sm"
                           onClick={() => (

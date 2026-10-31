@@ -12,7 +12,7 @@ export default async function PlayPage({ params }: { params: Promise<{ id: strin
   if (!r || r.type !== "html_game") notFound();
   return (
     <>
-      <div className="row" style={{ marginBottom: 12 }}>
+      <div className="row" style={{ marginBottom: "calc(12px * var(--z))" }}>
         <Link className="btn sm" href="/resources">
           返回資源庫
         </Link>
@@ -23,7 +23,7 @@ export default async function PlayPage({ params }: { params: Promise<{ id: strin
         src={playUrl(r.id, user.id)}
         sandbox="allow-scripts"
         referrerPolicy="no-referrer"
-        style={{ width: "100%", height: "calc(100vh - 200px)", minHeight: 480, border: "1px solid var(--line)", borderRadius: 5, background: "#fff" }}
+        style={{ width: "100%", height: "calc(100vh - 200px)", minHeight: "calc(480px * var(--z))", border: "1px solid var(--line)", borderRadius: 5, background: "#fff" }}
       />
     </>
   );

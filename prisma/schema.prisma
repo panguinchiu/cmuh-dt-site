@@ -94,6 +94,8 @@ model Board {
   files       Json           @default("{}")
   updatedAt   DateTime       @default(now())
   updatedById String?
+  // 置頂（排序第一）的版本＝白板畫面上正在編輯的版本；其內容即時存在 scene/files
+  activeVersionId String?
   versions    BoardVersion[]
 }
 
@@ -104,10 +106,11 @@ model BoardVersion {
   name        String
   scene       Json
   files       Json
+  sortOrder   Int      @default(0)
   createdById String?
   createdAt   DateTime @default(now())
 
-  @@index([boardId, createdAt])
+  @@index([boardId, sortOrder])
 }
 
 model Resource {

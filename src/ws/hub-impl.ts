@@ -273,6 +273,20 @@ export function createHub() {
       if (!b) return null;
       return { elements: Array.from(b.elements.values()), files: { ...b.files } };
     },
+    async appendToBoard(boardId, elements, files) {
+      const b = await loadBoard(boardId);
+      if (!b) return;
+      const added = (elements as El[]).filter((e) => !b.elements.has(e.id));
+      for (const e of added) b.elements.set(e.id, e);
+      b.files = { ...b.files, ...(files as FileMap) };
+      b.dirty = true;
+      b.updatedAt = new Date();
+      await flush(b);
+      for (const o of membersOf(b.id)) {
+        send(o.ws, { type: "files", boardId: b.id, files });
+        send(o.ws, { type: "update", boardId: b.id, elements: added, updatedAt: b.updatedAt });
+      }
+    },
     async replaceBoard(boardId, elements, files) {
       const b = await loadBoard(boardId);
       if (!b) return;

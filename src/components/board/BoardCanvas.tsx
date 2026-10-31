@@ -21,12 +21,13 @@ import type { RemoteExcalidrawElement } from "@excalidraw/excalidraw/data/reconc
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useWs } from "@/components/ws";
-import { MAX_IMAGE_BYTES, STICKY_COLORS, dataUrlBytes, unsynced } from "./sync";
+import { MAX_IMAGE_BYTES, STICKY_COLORS, dataUrlBytes, freeSpot, unsynced } from "./sync";
 import { downloadBlob, pngToA3Pdf, stamp, withHeader } from "./exporters";
+import { VersionsPanel, type Version } from "./VersionsPanel";
+import { SizeToggle } from "@/components/SizeToggle";
 
 type Files = Record<string, BinaryFileData>;
 type Status = { kind: "loading" | "saved" | "saving" | "offline"; at?: string };
-type Version = { id: string; name: string; createdAt: string; createdBy: string | null };
 
 const fmt = (iso?: string | Date) =>
   iso ? new Intl.DateTimeFormat("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(iso)) : "";
@@ -65,7 +66,7 @@ export default function BoardCanvas({
   const [sticky, setSticky] = useState(0);
   const [toast, setToast] = useState("");
   const [panel, setPanel] = useState<null | "versions">(null);
-  const [versions, setVersions] = useState<Version[]>([]);
+  const [activeName, setActiveName] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ v: Version; svg: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -182,8 +183,8 @@ export default function BoardCanvas({
     const w = 220;
     const h = 160;
     const z = st.zoom.value;
-    const x = -st.scrollX + st.width / 2 / z - w / 2 + (Math.random() * 40 - 20);
-    const y = -st.scrollY + st.height / 2 / z - h / 2 + (Math.random() * 40 - 20);
+    // 畫面中心附近找空位，避免多人同時貼在同一處疊在一起
+    const { x, y } = freeSpot(api.getSceneElements(), -st.scrollX + st.width / 2 / z, -st.scrollY + st.height / 2 / z, w, h);
     const [rect] = convertToExcalidrawElements([
       {
         type: "rectangle",
@@ -246,11 +247,6 @@ export default function BoardCanvas({
     }
   };
 
-  const loadVersions = useCallback(async () => {
-    const r = await fetch(`/api/boards/${boardId}/versions`);
-    if (r.ok) setVersions((await r.json()).versions);
-  }, [boardId]);
-
   const saveVersion = async () => {
     flush();
     const name = prompt("版本名稱（留白＝目前段落名稱＋時刻）", "");
@@ -264,10 +260,8 @@ export default function BoardCanvas({
       body: JSON.stringify(name.trim() ? { name: name.trim() } : {}),
     });
     setBusy(false);
-    if (r.ok) {
-      say(`已存成版本：${(await r.json()).name}`);
-      if (panel === "versions") void loadVersions();
-    } else say("存版本失敗");
+    if (r.ok) say(`已存成版本：${(await r.json()).name}`);
+    else say("存版本失敗");
   };
 
   const showPreview = async (v: Version) => {
@@ -286,17 +280,21 @@ export default function BoardCanvas({
     setPreview({ v, svg: svg.outerHTML });
   };
 
-  const restore = async (v: Version) => {
-    if (!confirm(`確定還原到「${v.name}」？\n還原前會自動把目前狀態再存一版。`)) return;
+  /** 換頁／複製前：先把畫面上的變更送到伺服器 */
+  const beforeChange = useCallback(async () => {
     flush();
     await new Promise((r) => setTimeout(r, 300));
-    const r = await fetch(`/api/boards/${boardId}/versions/${v.id}/restore`, { method: "POST" });
-    if (r.ok) {
-      say("已還原");
-      setPreview(null);
-      void loadVersions();
-    } else say("還原失敗");
-  };
+  }, [flush]);
+
+  // 置頂版本名稱（頂列顯示）
+  useEffect(() => {
+    const load = async () => {
+      const r = await fetch(`/api/boards/${boardId}/versions`, { cache: "no-store" });
+      if (r.ok) setActiveName(((await r.json()).versions as Version[]).find((v) => v.active)?.name ?? null);
+    };
+    void load();
+    return ws.on("board:versions", (m) => m.boardId === boardId && void load());
+  }, [ws, boardId]);
 
   const kind = ws.status === "closed" ? "offline" : status.kind;
   const statusText =
@@ -316,7 +314,7 @@ export default function BoardCanvas({
         </Link>
         <strong className="board-title">{groupName} 白板</strong>
         <span className="badge" title={presence.names.join("、")}>
-          <span className={`dot ${presence.count ? "on" : ""}`} style={{ marginRight: 6 }} />
+          <span className={`dot ${presence.count ? "on" : ""}`} style={{ marginRight: "calc(6px * var(--z))" }} />
           線上 {presence.count}
         </span>
         <div className="spacer" />
@@ -338,29 +336,29 @@ export default function BoardCanvas({
         <button className="btn sm" onClick={saveVersion} disabled={busy || !initial}>
           存成版本
         </button>
-        <button
-          className="btn sm"
-          onClick={() => {
-            setPanel(panel ? null : "versions");
-            if (!panel) void loadVersions();
-          }}
-        >
-          版本
+        <button className="btn sm" onClick={() => setPanel(panel ? null : "versions")} title="開啟版本清單">
+          版本：<b>{activeName ?? "…"}</b>
         </button>
-        <button className="btn sm" onClick={() => onExport("png")} disabled={busy || !initial}>
-          匯出 PNG
-        </button>
-        <button className="btn sm" onClick={() => onExport("pdf")} disabled={busy || !initial}>
-          匯出 PDF
-        </button>
+        <details className="export-menu">
+          <summary className="btn sm">匯出</summary>
+          <div className="menu">
+            <button className="btn sm" onClick={(e) => (e.currentTarget.closest("details")?.removeAttribute("open"), void onExport("png"))} disabled={busy || !initial}>
+              匯出 PNG
+            </button>
+            <button className="btn sm" onClick={(e) => (e.currentTarget.closest("details")?.removeAttribute("open"), void onExport("pdf"))} disabled={busy || !initial}>
+              匯出 PDF
+            </button>
+          </div>
+        </details>
         <span className={`save-status ${kind}`}>{statusText}</span>
+        <SizeToggle />
       </header>
 
       <div className="board-canvas">
         {initial ? (
           <Excalidraw
             excalidrawAPI={(api) => (apiRef.current = api)}
-            initialData={{ elements: initial.elements, files: initial.files, appState: { viewBackgroundColor: "#ffffff" }, scrollToContent: true }}
+            initialData={{ elements: initial.elements, files: initial.files, appState: { viewBackgroundColor: "#ffffff", currentItemFontSize: 36 }, scrollToContent: true }}
             onChange={schedule}
             theme={theme}
             langCode="zh-TW"
@@ -374,35 +372,14 @@ export default function BoardCanvas({
         )}
 
         {panel === "versions" && (
-          <aside className="versions-panel">
-            <div className="row">
-              <h3 style={{ margin: 0 }}>版本</h3>
-              <div className="spacer" />
-              <button className="btn sm ghost" onClick={() => setPanel(null)}>
-                關閉
-              </button>
-            </div>
-            {versions.length === 0 ? <p className="muted small">還沒有版本。按「存成版本」建立第一版。</p> : null}
-            <ul>
-              {versions.map((v) => (
-                <li key={v.id}>
-                  <div>{v.name}</div>
-                  <div className="muted small">
-                    {fmt(v.createdAt)}
-                    {v.createdBy ? ` · ${v.createdBy}` : ""}
-                  </div>
-                  <div className="row" style={{ gap: 6, marginTop: 4 }}>
-                    <button className="btn sm" onClick={() => void showPreview(v)}>
-                      預覽
-                    </button>
-                    <button className="btn sm" onClick={() => void restore(v)}>
-                      還原
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </aside>
+          <VersionsPanel
+            boardId={boardId}
+            onClose={() => setPanel(null)}
+            onPreview={(v) => void showPreview(v)}
+            beforeChange={beforeChange}
+            onActiveChange={setActiveName}
+            say={say}
+          />
         )}
 
         {preview && (
@@ -411,9 +388,6 @@ export default function BoardCanvas({
               <div className="row">
                 <h3 style={{ margin: 0 }}>預覽：{preview.v.name}</h3>
                 <div className="spacer" />
-                <button className="btn sm" onClick={() => void restore(preview.v)}>
-                  還原這一版
-                </button>
                 <button className="btn sm ghost" onClick={() => setPreview(null)}>
                   關閉
                 </button>

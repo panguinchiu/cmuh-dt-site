@@ -18,12 +18,12 @@ export function GameIntro() {
         {CHOICES.map((c) => (
           <div key={c} className="card tight">
             <span className={`chip ${c}`}>{CHOICE_LABEL[c]}</span>
-            <p style={{ marginTop: 8, marginBottom: 0 }}>{CHOICE_DESC[c]}</p>
+            <p style={{ marginTop: "calc(8px * var(--z))", marginBottom: 0 }}>{CHOICE_DESC[c]}</p>
           </div>
         ))}
       </section>
 
-      <section className="grid c2" style={{ marginTop: 18, alignItems: "start", marginBottom: 6 }}>
+      <section className="grid c2" style={{ marginTop: "calc(18px * var(--z))", alignItems: "start", marginBottom: "calc(6px * var(--z))" }}>
         <div className="card">
           <h3>收益矩陣</h3>
           <p className="muted small">每格為「內科, 外科」本回合點數</p>
@@ -56,7 +56,7 @@ export function GameIntro() {
         </div>
         <div className="card">
           <h3>規則</h3>
-          <ul style={{ margin: 0, paddingLeft: 20 }}>
+          <ul style={{ margin: 0, paddingLeft: "calc(20px * var(--z))" }}>
             <li>共 8 回合，兩隊每回合同時亮牌。</li>
             <li>
               第 4 回合分數 <b>×2</b>、第 8 回合 <b>×3</b>（已自動套用）。

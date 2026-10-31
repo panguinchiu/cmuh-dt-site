@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SizeToggle } from "@/components/SizeToggle";
 
 type P = { id: string; name: string; title: string | null };
 type G = { id: string; name: string; users: P[] };
@@ -44,19 +45,20 @@ export function LoginFlow({ groups, instructors }: { groups: G[]; instructors: P
 
   return (
     <div className="login-wrap">
-      <div className="row" style={{ marginBottom: 28 }}>
+      <div className="row" style={{ marginBottom: "calc(28px * var(--z))" }}>
         <div>
           <div className="kicker">CMUH · Department of Medical Education</div>
           <h1 style={{ marginBottom: 0 }}>設計思考工作坊</h1>
         </div>
         <div className="spacer" />
+        <SizeToggle />
         <ThemeToggle />
       </div>
 
       {mode === "pick" && (
         <div className="card">
           <h2>你是哪一組？</h2>
-          <div className="big-choices" style={{ marginTop: 14 }}>
+          <div className="big-choices" style={{ marginTop: "calc(14px * var(--z))" }}>
             {groups.map((g) => (
               <button key={g.id} className="btn" onClick={() => (setGroup(g), setMode("student"))}>
                 {g.name}
@@ -72,7 +74,7 @@ export function LoginFlow({ groups, instructors }: { groups: G[]; instructors: P
 
       {mode !== "pick" && !person && (
         <div className="card">
-          <div className="row" style={{ marginBottom: 12 }}>
+          <div className="row" style={{ marginBottom: "calc(12px * var(--z))" }}>
             <h2 style={{ margin: 0 }}>{mode === "student" ? `${group?.name}：請選你的名字` : "講師：請選你的名字"}</h2>
             <div className="spacer" />
             <button className="btn sm ghost" onClick={reset}>
@@ -92,7 +94,7 @@ export function LoginFlow({ groups, instructors }: { groups: G[]; instructors: P
 
       {person && (
         <form className="card" onSubmit={submit}>
-          <div className="row" style={{ marginBottom: 12 }}>
+          <div className="row" style={{ marginBottom: "calc(12px * var(--z))" }}>
             <h2 style={{ margin: 0 }}>
               {person.name}
               {mode === "student" ? <span className="muted">（{group?.name}）</span> : <span className="muted">（講師）</span>}

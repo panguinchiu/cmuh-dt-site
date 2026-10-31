@@ -48,9 +48,9 @@ export function AgendaEditor({ initial }: { initial: { items: Item[]; currentId:
       <table className="tbl">
         <thead>
           <tr>
-            <th style={{ width: 48 }}>#</th>
+            <th style={{ width: "calc(48px * var(--z))" }}>#</th>
             <th>段落標題</th>
-            <th style={{ width: 340 }}>操作</th>
+            <th style={{ width: "calc(340px * var(--z))" }}>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -84,7 +84,7 @@ export function AgendaEditor({ initial }: { initial: { items: Item[]; currentId:
                   </div>
                 </td>
                 <td>
-                  <div className="row" style={{ gap: 6 }}>
+                  <div className="row" style={{ gap: "calc(6px * var(--z))" }}>
                     <button className="btn sm" onClick={() => move(i, -1)} disabled={i === 0} aria-label="上移">
                       上移
                     </button>
@@ -116,14 +116,14 @@ export function AgendaEditor({ initial }: { initial: { items: Item[]; currentId:
       </table>
       <form
         className="row"
-        style={{ marginTop: 14 }}
+        style={{ marginTop: "calc(14px * var(--z))" }}
         onSubmit={(e) => {
           e.preventDefault();
           if (!newTitle.trim()) return;
           void run(call("/api/agenda", "POST", { title: newTitle.trim() })).then(() => setNewTitle(""));
         }}
       >
-        <input className="input" style={{ maxWidth: 420 }} placeholder="新增段落標題" value={newTitle} maxLength={100} onChange={(e) => setNewTitle(e.target.value)} />
+        <input className="input" style={{ maxWidth: "calc(420px * var(--z))" }} placeholder="新增段落標題" value={newTitle} maxLength={100} onChange={(e) => setNewTitle(e.target.value)} />
         <button className="btn primary" disabled={!newTitle.trim()}>
           新增段落
         </button>

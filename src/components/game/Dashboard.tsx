@@ -83,12 +83,12 @@ export function Dashboard({ slug, isInstructor, groups }: { slug: string; isInst
     <div>
       {isInstructor && (
         <section className="card tight row">
-          <label className="row" style={{ gap: 10, cursor: "pointer" }}>
+          <label className="row" style={{ gap: "calc(10px * var(--z))", cursor: "pointer" }}>
             <input
               type="checkbox"
               checked={d.published}
               onChange={(e) => void run(call(`/api/game/${slug}/publish`, "POST", { published: e.target.checked }))}
-              style={{ width: 22, height: 22 }}
+              style={{ width: "calc(22px * var(--z))", height: "calc(22px * var(--z))" }}
             />
             <span>
               <b>公開給學員</b>
@@ -116,7 +116,7 @@ export function Dashboard({ slug, isInstructor, groups }: { slug: string; isInst
       )}
       {err && <div className="notice err">{err}</div>}
 
-      <section className="grid c3" style={{ marginBottom: 18 }}>
+      <section className="grid c3" style={{ marginBottom: "calc(18px * var(--z))" }}>
         <div className="card tight stat">
           <div className="lab">已開始對局</div>
           <div className="val">
@@ -153,7 +153,7 @@ export function Dashboard({ slug, isInstructor, groups }: { slug: string; isInst
                 　達成度 {Math.round(m.result.ratio * 100)}%・首次脫離 {m.result.defect ? `第 ${m.result.defect} 回` : "—"}
               </span>
             </div>
-            <div className="tscroll" style={{ marginTop: 10 }}>
+            <div className="tscroll" style={{ marginTop: "calc(10px * var(--z))" }}>
               <table className="tbl">
                 <thead>
                   <tr>
@@ -204,7 +204,7 @@ export function Dashboard({ slug, isInstructor, groups }: { slug: string; isInst
                 </tbody>
               </table>
             </div>
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: "calc(12px * var(--z))" }}>
               <LineChart
                 defect={m.result.defect}
                 series={[
@@ -224,10 +224,10 @@ export function Dashboard({ slug, isInstructor, groups }: { slug: string; isInst
           {d.ledger.map((l) => (
             <div key={l.label} className="card tight" style={{ marginBottom: 0 }}>
               <div className="lab muted">{l.label}</div>
-              <div className="big-num" style={{ fontSize: 44 }}>
+              <div className="big-num" style={{ fontSize: "calc(44px * var(--z))" }}>
                 {l.value}
               </div>
-              <p className="small" style={{ marginTop: 8, marginBottom: 0 }}>
+              <p className="small" style={{ marginTop: "calc(8px * var(--z))", marginBottom: 0 }}>
                 {l.note}
               </p>
             </div>
@@ -237,9 +237,9 @@ export function Dashboard({ slug, isInstructor, groups }: { slug: string; isInst
 
       <section className="card">
         <h3>Debrief 四問</h3>
-        <ol style={{ margin: 0, paddingLeft: 22 }}>
+        <ol style={{ margin: 0, paddingLeft: "calc(22px * var(--z))" }}>
           {d.debrief.map((q) => (
-            <li key={q} style={{ marginBottom: 8 }}>
+            <li key={q} style={{ marginBottom: "calc(8px * var(--z))" }}>
               {q}
             </li>
           ))}
@@ -254,11 +254,11 @@ function MatchTools({ slug, m, groups, run }: { slug: string; m: M; groups: G[];
   const [surg, setSurg] = useState(m.surg?.id ?? "");
   const dirty = med !== (m.med?.id ?? "") || surg !== (m.surg?.id ?? "");
   return (
-    <details style={{ marginTop: 12 }}>
+    <details style={{ marginTop: "calc(12px * var(--z))" }}>
       <summary className="muted" style={{ cursor: "pointer" }}>
         講師工具：配對／重置
       </summary>
-      <div className="row" style={{ marginTop: 10 }}>
+      <div className="row" style={{ marginTop: "calc(10px * var(--z))" }}>
         <label className="field" style={{ margin: 0 }}>
           <span>內科隊</span>
           <select className="input" value={med} onChange={(e) => setMed(e.target.value)}>
