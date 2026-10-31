@@ -266,3 +266,11 @@ select.choice-select.SELF { color: var(--self); background: var(--self-bg); font
 .board-canvas .excalidraw .App-toolbar .App-toolbar__extra-tools-trigger,
 .board-canvas .excalidraw .App-toolbar [data-testid="dropdown-menu-button"],
 .board-canvas .excalidraw .App-toolbar .App-toolbar__divider { display: none !important; }
+
+/* overview */
+.agenda-switch { display: flex; flex-wrap: wrap; gap: 8px; }
+.agenda-switch .btn { white-space: normal; text-align: left; justify-content: flex-start; }
+a.board-card { display: block; color: inherit; }
+a.board-card:hover { text-decoration: none; border-color: var(--accent); }
+.boards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 760px) { .boards-grid { grid-template-columns: 1fr; } }
