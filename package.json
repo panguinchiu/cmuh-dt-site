@@ -1,0 +1,50 @@
+{
+  "name": "cmuh-dt-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "中國附醫教學部 設計思考工作坊 課程網站",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx server.ts",
+    "build": "next build && node scripts/build-server.mjs",
+    "start": "NODE_ENV=production node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "seed": "tsx prisma/seed.ts",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "azurite": "azurite --blobHost 127.0.0.1 --blobPort 10000 --location .azurite --silent --loose --skipApiVersionCheck --blobOnly",
+    "postinstall": "prisma generate && node scripts/copy-excalidraw-assets.mjs"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.34.0",
+    "@excalidraw/excalidraw": "^0.18.1",
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
+    "fflate": "^0.8.3",
+    "next": "^16.4.3",
+    "pdf-lib": "^1.17.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/ws": "^8.18.2",
+    "azurite": "^3.37.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.3",
+    "playwright": "^1.64.1",
+    "prisma": "^6.19.3",
+    "tsx": "^4.23.15",
+    "typescript": "5.9",
+    "vitest": "^4.1.12"
+  }
+}

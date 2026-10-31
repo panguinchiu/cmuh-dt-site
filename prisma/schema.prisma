@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  student
+  instructor
+}
+
+enum ResourceType {
+  file
+  link
+  html_game
+}
+
+enum Visibility {
+  all_students
+  groups
+  users
+  instructors_only
+}
+
+enum Choice {
+  FULL
+  HOLD
+  SELF
+}
+
+model Group {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  sortOrder Int
+  codeHash  String
+  users     User[]
+  board     Board?
+  resources ResourceGroup[]
+  medMatches  GameMatch[] @relation("MedGroup")
+  surgMatches GameMatch[] @relation("SurgGroup")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  role         Role
+  groupId      String?
+  group        Group?    @relation(fields: [groupId], references: [id])
+  title        String?
+  passwordHash String?
+  active       Boolean   @default(true)
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+  resources    ResourceUser[]
+
+  @@unique([role, name])
+}
+
+model Session {
+  id        String   @id // sha256(token)，cookie 只存原始 token
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AgendaItem {
+  id        String     @id @default(uuid())
+  seq       String
+  time      String
+  title     String
+  note      String?
+  sortOrder Int
+  resources Resource[]
+}
+
+model AppState {
+  id                   Int     @id @default(1)
+  currentAgendaItemId  String?
+}
+
+model Board {
+  id          String         @id @default(uuid())
+  groupId     String         @unique
+  group       Group          @relation(fields: [groupId], references: [id])
+  scene       Json           @default("[]")
+  files       Json           @default("{}")
+  updatedAt   DateTime       @default(now())
+  updatedById String?
+  versions    BoardVersion[]
+}
+
+model BoardVersion {
+  id          String   @id @default(uuid())
+  boardId     String
+  board       Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  name        String
+  scene       Json
+  files       Json
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  @@index([boardId, createdAt])
+}
+
+model Resource {
+  id           String          @id @default(uuid())
+  title        String
+  description  String?
+  type         ResourceType
+  url          String?
+  blobKey      String?
+  fileName     String?
+  mimeType     String?
+  size         Int?
+  visibility   Visibility
+  agendaItemId String?
+  agendaItem   AgendaItem?     @relation(fields: [agendaItemId], references: [id], onDelete: SetNull)
+  sortOrder    Int             @default(0)
+  createdById  String?
+  createdAt    DateTime        @default(now())
+  groups       ResourceGroup[]
+  users        ResourceUser[]
+}
+
+model ResourceGroup {
+  resourceId String
+  groupId    String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, groupId])
+}
+
+model ResourceUser {
+  resourceId String
+  userId     String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, userId])
+}
+
+model Game {
+  id        String      @id @default(uuid())
+  slug      String      @unique
+  title     String
+  published Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  matches   GameMatch[]
+}
+
+model GameMatch {
+  id          String      @id @default(uuid())
+  gameId      String
+  game        Game        @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  label       String
+  sortOrder   Int         @default(0)
+  medGroupId  String?
+  medGroup    Group?      @relation("MedGroup", fields: [medGroupId], references: [id])
+  surgGroupId String?
+  surgGroup   Group?      @relation("SurgGroup", fields: [surgGroupId], references: [id])
+  rounds      GameRound[]
+}
+
+model GameRound {
+  id          String    @id @default(uuid())
+  matchId     String
+  match       GameMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  round       Int
+  medChoice   Choice?
+  surgChoice  Choice?
+  updatedById String?
+  updatedAt   DateTime  @default(now()) @updatedAt
+
+  @@unique([matchId, round])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  target    String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
