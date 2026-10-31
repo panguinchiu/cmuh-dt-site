@@ -3,6 +3,11 @@
  * 部署為單一 instance（白板狀態在記憶體，見 README）。
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+
+// 本機讀 .env（不覆寫已存在的環境變數；正式環境用 App Settings，沒有 .env 也沒關係）
+try {
+  process.loadEnvFile(".env");
+} catch {}
 import next from "next";
 import { createHub } from "@/ws/hub-impl";
 import { setHub } from "@/lib/hub";

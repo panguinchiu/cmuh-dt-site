@@ -5,6 +5,11 @@
  * - 已存在的資料不覆寫（講師在後台的修改會保留）
  */
 import { randomInt, randomBytes } from "node:crypto";
+
+// 本機讀 .env（不覆寫已存在的環境變數；正式環境用 App Settings，沒有 .env 也沒關係）
+try {
+  process.loadEnvFile(".env");
+} catch {}
 import { appendFileSync } from "node:fs";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
