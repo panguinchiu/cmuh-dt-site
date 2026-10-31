@@ -1,0 +1,27 @@
+# 本機開發用：Postgres 16 + Azurite（Azure Blob 模擬器）
+# 沒有 Docker 時請見 README「不用 Docker」段落（brew postgresql + npx azurite）
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cmuh
+      POSTGRES_PASSWORD: cmuh_local_dev
+      POSTGRES_DB: cmuh_dt
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    restart: unless-stopped
+    command: azurite-blob --blobHost 0.0.0.0 --blobPort 10000 --loose --skipApiVersionCheck
+    ports:
+      - "10000:10000"
+    volumes:
+      - azurite:/data
+
+volumes:
+  pgdata:
+  azurite:

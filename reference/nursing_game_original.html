@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>照護量能賽局 ｜ 參與護理政策工作坊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#22402E; --green-dark:#182E20; --green-soft:#31513C; --green-line:#2f4c39;
+  --cream:#F2EDE1; --card:#FCFAF3; --card-2:#F7F3E9;
+  --gold:#B4903A; --gold-soft:#C9A75A; --gold-bg:#F0E7CF;
+  --border:#DED6C1; --ink:#28281f; --muted:#7C7869;
+  --coop:#2E7D4F; --hold:#B4903A; --self:#9C4B3B;
+  --serif:'Noto Serif TC','Songti TC','PingFang TC','Microsoft JhengHei',serif;
+  --sans:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--cream);-webkit-font-smoothing:antialiased;line-height:1.6}
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+.sidebar{background:var(--green);color:#EDE9DA;display:flex;flex-direction:column;padding:22px 16px;gap:6px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 6px 18px;border-bottom:1px solid var(--green-line);margin-bottom:10px}
+.logo{width:46px;height:46px;border-radius:12px;background:#FBF9F2;display:grid;place-items:center;overflow:hidden}
+.logo img{width:78%;height:78%;object-fit:contain;display:block}
+.brand h1{font-family:var(--serif);font-size:17px;font-weight:700;margin:0;line-height:1.35;color:#F3EFE2}
+.nav{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.nav-label{font-size:12px;color:#9DB0A2;letter-spacing:2px;padding:14px 10px 6px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;color:#D9DCCF;font-size:15px;font-family:var(--sans)}
+.nav button .ic{width:18px;text-align:center;opacity:.85}
+.nav button:hover{background:var(--green-soft)}
+.nav button.active{background:#EDE7D6;color:var(--green);font-weight:700}
+.side-foot{margin-top:auto;border-top:1px solid var(--green-line);padding-top:12px;display:flex;flex-direction:column;gap:2px}
+.side-foot button{all:unset;cursor:pointer;padding:11px 12px;border-radius:10px;font-size:14px;color:#D9DCCF}
+.side-foot button:hover{background:var(--green-soft)}
+main{min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 30px;border-bottom:1px solid var(--border)}
+.topbar .tt h2{font-family:var(--serif);font-size:24px;margin:0;color:var(--green)}
+.topbar .tt p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.content{padding:26px 30px 60px;max-width:1180px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin-bottom:22px}
+.card > h3{font-family:var(--serif);font-size:19px;margin:0 0 4px;color:var(--green);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card .sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.badge{background:var(--gold-bg);color:var(--gold);border:1px solid #E4D6AE;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;font-family:var(--serif)}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12.5px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+select,input[type=text],input[type=password]{font-family:var(--sans);font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 12px;min-width:120px}
+select:focus,input:focus{outline:2px solid var(--gold-soft);outline-offset:1px}
+.seg{display:inline-flex;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:3px}
+.seg button{all:unset;cursor:pointer;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--green);color:#F3EFE2}
+.btn{all:unset;cursor:pointer;background:var(--green);color:#F3EFE2;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;text-align:center}
+.btn.ghost{background:transparent;color:var(--green);border:1px solid var(--border)}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:center}
+.scorebox{background:var(--green);color:#F1EEDF;border-radius:14px;padding:20px 22px}
+.scorebox .lab{font-size:13px;color:#BFD0C4;letter-spacing:1px}
+.scorebox .big{font-family:var(--serif);font-size:52px;font-weight:900;line-height:1;margin:6px 0 2px}
+.scorebox .vs{font-size:13.5px;color:#CFC9B4}.scorebox .vs b{color:var(--gold-soft)}
+.metrics{display:flex;gap:12px;flex-wrap:wrap}
+.metric{flex:1;min-width:120px;background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.metric .m-lab{font-size:12px;color:var(--muted)}
+.metric .m-val{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 8px;text-align:center;border-bottom:1px solid #EBE5D5}
+th{font-family:var(--serif);color:var(--green);font-weight:700;font-size:13.5px;background:var(--card-2)}
+td.rd{font-weight:700;color:var(--muted)}
+tr.wt td{background:#FBF4E4}
+.wtag{font-size:11px;color:var(--gold);font-weight:700}
+.selc{min-width:104px}
+.tot td{font-weight:800;color:var(--green);background:var(--card-2);border-top:2px solid var(--border)}
+.chartwrap{margin-top:10px}
+.legend{display:flex;gap:18px;font-size:12.5px;color:var(--muted);margin:8px 2px 0;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.matches{display:grid;grid-template-columns:1fr;gap:22px}
+.mhead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.vs-names{font-family:var(--serif);font-size:18px;color:var(--green)}
+.vs-names .u{color:var(--gold)}
+.verdict{font-weight:700;font-size:13.5px}
+.pill3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+.stat .s-lab{font-size:12.5px;color:var(--muted)}
+.stat .s-val{font-family:var(--serif);font-size:30px;font-weight:800;color:var(--green);line-height:1.1;margin-top:2px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:4px}
+.help p{margin:0 0 10px}.help code{background:var(--gold-bg);padding:2px 6px;border-radius:6px;font-size:13px}
+.help h4{font-family:var(--serif);color:var(--gold);margin:18px 0 6px}
+.foot-note{font-size:12px;color:var(--muted);margin-top:8px}
+.login{max-width:380px;margin:6px auto 0}
+.login .field{margin-bottom:14px}
+.login .err{color:var(--self);font-size:13px;min-height:18px;margin:2px 0 8px}
+.logout{all:unset;cursor:pointer;color:var(--muted);font-size:13px;border:1px solid var(--border);padding:6px 12px;border-radius:8px}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mgrid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start;margin-top:12px}
+.pwbox{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;max-width:420px}
+@media(max-width:900px){ .mgrid{grid-template-columns:1fr} }
+@media(max-width:820px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:sticky;top:0;z-index:20;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px;gap:4px}
+  .brand{border:0;margin:0 auto 0 0;padding:0 6px}.brand h1{font-size:14px}
+  .nav{flex-direction:row;flex-wrap:wrap;margin:0}.nav-label{display:none}
+  .nav button{padding:8px 11px;font-size:14px}
+  .side-foot{display:none}
+  .hero{grid-template-columns:1fr}
+  .pill3{grid-template-columns:1fr}
+  .content{padding:16px 12px 48px}.topbar{padding:12px 16px}
+  .topbar .tt h2{font-size:20px}
+  .card{padding:16px 14px;border-radius:14px}
+  table{font-size:13px}.selc{min-width:92px}
+  th,td{padding:8px 6px}
+}
+@media(max-width:560px){
+  .scorebox .big{font-size:42px}
+  .nav button span.ic{display:none}
+  .metric{min-width:100px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo"><img src="data:image/png;base64,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" alt="ili"></div><h1>參與護理政策<br>工作坊</h1></div>
+    <div class="nav" id="nav">
+      <div class="nav-label">賽局工具</div>
+      <button data-v="student" class="active"><span class="ic">✎</span> 學員作答</button>
+      <button data-v="instructor"><span class="ic">▦</span> 講師儀表板</button>
+      <button data-v="help"><span class="ic">?</span> 使用說明</button>
+    </div>
+    <div class="side-foot">
+      <button id="btnReset" style="color:#E7B9AC">↺ 重置全部</button>
+    </div>
+  </aside>
+  <main>
+    <div class="topbar">
+      <div class="tt"><h2 id="pgTitle">學員作答</h2><p id="pgSub">照護量能的每月抉擇 ｜ 八回合合作賽局</p></div>
+    </div>
+    <div class="content">
+      <section id="view-student"></section>
+      <section id="view-instructor" style="display:none"></section>
+      <section id="view-help" style="display:none"></section>
+    </div>
+  </main>
+</div>
+<script>
+const MATCHES=[{key:'m1',label:'A大組'},{key:'m2',label:'B大組'},{key:'m3',label:'C大組'}];
+const GROUPNUMS=[1,2,3,4,5,6];
+const LEVELS=['全力共援','保留一手','優先自保'];
+const LHEX={'全力共援':'#2E7D4F','保留一手':'#B4903A','優先自保':'#9C4B3B'};
+const WEIGHTS=[1,1,1,2,1,1,1,3];
+const PAY={
+ '全力共援|全力共援':[11,11],'全力共援|保留一手':[2,18],'全力共援|優先自保':[2,15],
+ '保留一手|全力共援':[18,2],'保留一手|保留一手':[8,8],'保留一手|優先自保':[3,15],
+ '優先自保|全力共援':[15,2],'優先自保|保留一手':[15,3],'優先自保|優先自保':[5,5]};
+const COOP_MAX=121, JOINT_MAX=242;
+const KEY='twt_trustgame_v2';
+const glabel=v=>v?('第'+v+'組'):'';
+const USERNAME='admin';
+const DEFAULT_HASH='03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'; // sha256('1234')
+function getHash(){try{return localStorage.getItem('twt_pwhash')||DEFAULT_HASH;}catch(e){return DEFAULT_HASH;}}
+function sha256(ascii){function r(v,a){return(v>>>a)|(v<<(32-a));}var mp=Math.pow,mw=mp(2,32),i,j,res='',words=[],bl=ascii.length*8,hash=sha256.h=sha256.h||[],k=sha256.k=sha256.k||[],pc=k.length,comp={};for(var c=2;pc<64;c++){if(!comp[c]){for(i=0;i<313;i+=c)comp[i]=c;hash[pc]=(mp(c,.5)*mw)|0;k[pc++]=(mp(c,1/3)*mw)|0;}}ascii+='\x80';while(ascii.length%64-56)ascii+='\x00';for(i=0;i<ascii.length;i++){j=ascii.charCodeAt(i);if(j>>8)return;words[i>>2]|=j<<((3-i)%4)*8;}words[words.length]=(bl/mw)|0;words[words.length]=bl;for(j=0;j<words.length;){var w=words.slice(j,j+=16),oh=hash;hash=hash.slice(0,8);for(i=0;i<64;i++){var w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4],t1=hash[7]+(r(e,6)^r(e,11)^r(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=i<16?w[i]:(w[i-16]+(r(w15,7)^r(w15,18)^(w15>>>3))+w[i-7]+(r(w2,17)^r(w2,19)^(w2>>>10)))|0),t2=(r(a,2)^r(a,13)^r(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));hash=[(t1+t2)|0].concat(hash);hash[4]=(hash[4]+t1)|0;}for(i=0;i<8;i++)hash[i]=(hash[i]+oh[i])|0;}for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(hash[i]>>(j*8))&255;res+=((b<16)?0:'')+b.toString(16);}return res;}
+function hashpw(p){return sha256(unescape(encodeURIComponent(p)));}
+
+function blankState(){const s={groups:{},rounds:{}};MATCHES.forEach(m=>{s.groups[m.key]={f:'',u:''};s.rounds[m.key]=Array.from({length:8},()=>({f:'',u:''}));});return s;}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s.groups&&s.rounds)return s;}}catch(e){}return null;}
+let state=load()||blankState();
+let ui={view:'student',match:'m1',side:'f'};
+let authed=false;try{authed=sessionStorage.getItem('twt_authed')==='1';}catch(e){}
+let bc=null;try{bc=new BroadcastChannel(KEY);bc.onmessage=()=>{const s=load();if(s){state=s;renderAll();}};}catch(e){}
+window.addEventListener('storage',e=>{if(e.key===KEY){const s=load();if(s){state=s;renderAll();}}});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}try{bc&&bc.postMessage('u');}catch(e){}}
+
+function computeMatch(mk){
+  const rs=state.rounds[mk];let fc=0,uc=0,ftot=0,utot=0,defect=null;
+  const rows=rs.map((r,i)=>{const w=WEIGHTS[i];let fp='',up='';
+    if(r.f&&r.u){const p=PAY[r.f+'|'+r.u];fp=p[0];up=p[1];fc+=fp*w;uc+=up*w;ftot+=fp*w;utot+=up*w;
+      if(defect===null&&!(r.f==='全力共援'&&r.u==='全力共援'))defect=i+1;}
+    return{n:i+1,f:r.f,u:r.u,w,fp,up,fcum:(r.f&&r.u)?fc:'',ucum:(r.f&&r.u)?uc:''};});
+  const joint=ftot+utot,ratio=joint/JOINT_MAX,played=rs.some(r=>r.f&&r.u);
+  return{rows,ftot,utot,joint,ratio,defect,played};
+}
+function verdict(ratio,played){if(!played)return['（尚未開始）','var(--muted)'];if(ratio>=0.85)return['接近全程共好 👏','var(--coop)'];if(ratio>=0.60)return['多數回合合作','var(--green)'];if(ratio>=0.46)return['偏向僵局','var(--hold)'];return['信任崩壞，雙輸','var(--self)'];}
+
+function lineChart(series,opts={}){
+  const W=640,H=230,pad={l:38,r:14,t:14,b:26},n=8;
+  let maxY=0;series.forEach(s=>s.pts.forEach(v=>{if(v!=null&&v>maxY)maxY=v;}));maxY=Math.max(20,Math.ceil(maxY/20)*20);
+  const x=i=>pad.l+(W-pad.l-pad.r)*i/(n-1),y=v=>H-pad.b-(H-pad.t-pad.b)*(v/maxY);
+  let g='';for(let t=0;t<=maxY;t+=maxY/4){g+=`<line x1="${pad.l}" y1="${y(t)}" x2="${W-pad.r}" y2="${y(t)}" stroke="#EBE5D5"/><text x="${pad.l-6}" y="${y(t)+4}" font-size="11" fill="#9a9683" text-anchor="end">${t}</text>`;}
+  for(let i=0;i<n;i++)g+=`<text x="${x(i)}" y="${H-6}" font-size="11" fill="#9a9683" text-anchor="middle">${i+1}</text>`;
+  let lines='';series.forEach(s=>{const pv=s.pts.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
+    if(pv.length){lines+=`<polyline fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" points="${pv.map(p=>p.join(',')).join(' ')}"/>`;pv.forEach(p=>lines+=`<circle cx="${p[0]}" cy="${p[1]}" r="3.2" fill="${s.color}"/>`);}});
+  if(opts.defect){const dx=x(opts.defect-1);lines+=`<line x1="${dx}" y1="${pad.t}" x2="${dx}" y2="${H-pad.b}" stroke="#9C4B3B" stroke-width="1.2" stroke-dasharray="4 3"/><text x="${dx+3}" y="${pad.t+11}" font-size="10.5" fill="#9C4B3B">背叛</text>`;}
+  return `<div class="chartwrap"><svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img">${g}${lines}</svg></div>`;
+}
+function legend(items){return `<div class="legend">${items.map(i=>`<span><i style="background:${i.color}"></i>${i.name}</span>`).join('')}</div>`;}
+function selOpts(val){return `<option value=""${val?'':' selected'}>—</option>`+LEVELS.map(l=>`<option ${l===val?'selected':''}>${l}</option>`).join('');}
+function grpOpts(val){return `<option value=""${val?'':' selected'}>—</option>`+GROUPNUMS.map(g=>`<option value="${g}" ${String(g)===String(val)?'selected':''}>第${g}組</option>`).join('');}
+
+/* ---------- STUDENT ---------- */
+function renderStudent(){
+  const el=document.getElementById('view-student');
+  const mk=ui.match,side=ui.side,g=state.groups[mk],c=computeMatch(mk);
+  const myTot=side==='f'?c.ftot:c.utot,opTot=side==='f'?c.utot:c.ftot;
+  const myG=glabel(side==='f'?g.f:g.u)||(side==='f'?'F 隊':'U 隊');
+  const opG=glabel(side==='f'?g.u:g.f)||(side==='f'?'U 隊':'F 隊');
+  const myCum=c.rows.map(r=>r.fcum===''?null:(side==='f'?r.fcum:r.ucum));
+  const opCum=c.rows.map(r=>r.fcum===''?null:(side==='f'?r.ucum:r.fcum));
+  const ratioMy=Math.round(myTot/COOP_MAX*100);
+  el.innerHTML=`
+  <div class="card">
+    <h3>選擇你的組別 <span class="badge">照護量能賽局</span></h3>
+    <p class="sub">先選你在哪一個大組、代表 F 還是 U，並勾選你和對手各是第幾組；接著逐回合填選擇，分數自動加權累計。</p>
+    <div class="row">
+      <div class="field"><label>你在哪一大組</label><select id="s_match">${MATCHES.map(m=>`<option value="${m.key}" ${m.key===mk?'selected':''}>${m.label}</option>`).join('')}</select></div>
+      <div class="field"><label>我方座位</label><div class="seg"><button id="s_f" class="${side==='f'?'on':''}">F 隊</button><button id="s_u" class="${side==='u'?'on':''}">U 隊</button></div></div>
+      <div class="field"><label>我方是第幾組</label><select id="s_mygrp">${grpOpts(side==='f'?g.f:g.u)}</select></div>
+      <div class="field"><label>對手是第幾組</label><select id="s_opgrp">${grpOpts(side==='f'?g.u:g.f)}</select></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="hero">
+      <div class="scorebox">
+        <div class="lab">${myG}（${side==='f'?'F':'U'}）｜加權後累計分數</div>
+        <div class="big">${myTot}</div>
+        <div class="vs">對手 ${opG}：<b>${opTot}</b> ｜ 距全程共好上限 121 還差 ${Math.max(0,COOP_MAX-myTot)}</div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="m-lab">目前完成回合</div><div class="m-val">${c.rows.filter(r=>r.f&&r.u).length} / 8</div></div>
+        <div class="metric"><div class="m-lab">我方共好達成度</div><div class="m-val">${ratioMy}%</div></div>
+        <div class="metric"><div class="m-lab">首次脫離共好</div><div class="m-val">${c.defect?('第 '+c.defect+' 回'):(c.played?'尚未':'—')}</div></div>
+      </div>
+    </div>
+    <div style="margin-top:18px">
+      ${lineChart([{name:myG,color:'#2E7D4F',pts:myCum},{name:opG,color:'#B4903A',pts:opCum}],{defect:c.defect})}
+      ${legend([{name:myG+'（累計）',color:'#2E7D4F'},{name:opG+'（累計）',color:'#B4903A'}])}
+    </div>
+  </div>
+  <div class="card">
+    <h3>逐回合填寫</h3>
+    <p class="sub">第 4 回合分數 ×2、第 8 回合 ×3（已自動套用）。兩隊亮牌後，選你這回合的『我方』與『對手』選擇即可。</p>
+    <div class="tscroll"><table>
+      <thead><tr><th>回合</th><th>我方選擇</th><th>對手選擇</th><th>我方本回合</th><th>加權</th><th>我方累計</th><th>對方累計</th></tr></thead>
+      <tbody>
+      ${c.rows.map((r,i)=>{const myV=side==='f'?r.f:r.u,opV=side==='f'?r.u:r.f;const myPt=(r.f&&r.u)?(side==='f'?r.fp:r.up):'';const myCumV=r.fcum===''?'':(side==='f'?r.fcum:r.ucum);const opCumV=r.fcum===''?'':(side==='f'?r.ucum:r.fcum);
+        return `<tr class="${r.w>1?'wt':''}"><td class="rd">${r.n}</td>
+          <td><select class="selc s_my" data-i="${i}">${selOpts(myV)}</select></td>
+          <td><select class="selc s_op" data-i="${i}">${selOpts(opV)}</select></td>
+          <td>${myPt===''?'—':myPt}</td><td>×${r.w}${r.w>1?' <span class="wtag">加權</span>':''}</td>
+          <td><b style="color:var(--green)">${myCumV===''?'—':myCumV}</b></td>
+          <td><b style="color:var(--gold)">${opCumV===''?'—':opCumV}</b></td></tr>`;}).join('')}
+      </tbody>
+    </table></div>
+    <p class="foot-note">提示：手機上點欄位會跳出選單；電腦上點選後可按鍵盤首字快速選。改錯直接重選即可。</p>
+  </div>`;
+  document.getElementById('s_match').onchange=e=>{ui.match=e.target.value;renderStudent();};
+  document.getElementById('s_f').onclick=()=>{ui.side='f';renderStudent();};
+  document.getElementById('s_u').onclick=()=>{ui.side='u';renderStudent();};
+  document.getElementById('s_mygrp').onchange=e=>{state.groups[mk][side==='f'?'f':'u']=e.target.value;save();renderStudent();};
+  document.getElementById('s_opgrp').onchange=e=>{state.groups[mk][side==='f'?'u':'f']=e.target.value;save();renderStudent();};
+  el.querySelectorAll('.s_my').forEach(s=>s.onchange=e=>{state.rounds[mk][+e.target.dataset.i][side==='f'?'f':'u']=e.target.value;save();renderStudent();});
+  el.querySelectorAll('.s_op').forEach(s=>s.onchange=e=>{state.rounds[mk][+e.target.dataset.i][side==='f'?'u':'f']=e.target.value;save();renderStudent();});
+}
+
+/* ---------- INSTRUCTOR (login-gated) ---------- */
+function renderInstructor(){
+  const el=document.getElementById('view-instructor');
+  if(!authed){
+    el.innerHTML=`<div class="card"><h3>講師登入</h3><p class="sub">此區為講師專用，請輸入帳號密碼。</p>
+      <div class="login">
+        <div class="field"><label>帳號</label><input type="text" id="lg_u" autocomplete="username" placeholder="admin"></div>
+        <div class="field"><label>密碼</label><input type="password" id="lg_p" autocomplete="current-password" placeholder="••••"></div>
+        <div class="err" id="lg_err"></div>
+        <button class="btn" id="lg_go">登入</button>
+      </div></div>`;
+    const go=()=>{const u=document.getElementById('lg_u').value.trim(),p=document.getElementById('lg_p').value;
+      if(u===USERNAME&&hashpw(p)===getHash()){authed=true;try{sessionStorage.setItem('twt_authed','1');}catch(e){}renderInstructor();}
+      else document.getElementById('lg_err').textContent='帳號或密碼不正確，請再試一次。';};
+    document.getElementById('lg_go').onclick=go;
+    document.getElementById('lg_p').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+    return;
+  }
+  const cs=MATCHES.map(m=>({m,c:computeMatch(m.key),g:state.groups[m.key]}));
+  const best=cs.filter(x=>x.c.played).sort((a,b)=>b.c.joint-a.c.joint)[0];
+  el.innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <div style="font-size:13.5px;color:var(--muted)">各大組配對與協作歷程一覽</div>
+    <div style="display:flex;gap:8px">
+      <button class="logout" id="btnPw">變更密碼</button>
+      <button class="logout" id="btnLogout">登出講師模式</button>
+    </div>
+  </div>
+  <div class="pwbox" id="pwbox" style="display:none">
+    <div class="field" style="margin-bottom:10px"><label>目前密碼</label><input type="password" id="pw_old"></div>
+    <div class="field" style="margin-bottom:10px"><label>新密碼（至少 4 碼）</label><input type="password" id="pw_new"></div>
+    <div class="err" id="pw_err" style="min-height:16px;font-size:13px"></div>
+    <button class="btn" id="pw_save">儲存新密碼</button>
+  </div>
+  <div class="pill3">
+    <div class="stat"><div class="s-lab">已開始大組</div><div class="s-val">${cs.filter(x=>x.c.played).length} / 3</div><div class="hint">六組・兩兩一組</div></div>
+    <div class="stat"><div class="s-lab">目前共創最高</div><div class="s-val">${best?best.c.joint:'—'}</div><div class="hint">${best?best.m.label+'（雙方合計）':'尚無資料'}</div></div>
+    <div class="stat"><div class="s-lab">全程共好上限</div><div class="s-val">242</div><div class="hint">全程自保僅 110</div></div>
+  </div>
+  <div class="card">
+    <h3>各大組共創總價值</h3>
+    <p class="sub">越接近 242＝越快達成互信共好、共同創造越多。</p>
+    ${barChart(cs.map(x=>({name:x.m.label,v:x.c.joint})))}
+  </div>
+  <div class="matches">
+  ${cs.map(({m,c,g})=>{
+    const v=verdict(c.ratio,c.played);
+    const fG=g.f?('第'+g.f+'組'):'F 隊（待指定）',uG=g.u?('第'+g.u+'組'):'U 隊（待指定）';
+    const fCum=c.rows.map(r=>r.fcum===''?null:r.fcum),uCum=c.rows.map(r=>r.ucum===''?null:r.ucum);
+    return `<div class="card">
+      <div class="mhead">
+        <div class="vs-names">${m.label}　<span>${fG}</span> <span style="color:var(--muted)">（F）vs（U）</span> <span class="u">${uG}</span></div>
+        <div class="verdict" style="color:${v[1]}">${v[0]}　<span style="color:var(--muted);font-weight:400">達成度 ${Math.round(c.ratio*100)}%・首次脫離 ${c.defect?('第'+c.defect+'回'):'—'}</span></div>
+      </div>
+      <div class="mgrid">
+        <div class="tscroll"><table>
+          <thead><tr><th>回合</th><th>${fG}（F）</th><th>${uG}（U）</th><th>F 點</th><th>U 點</th><th>加權</th><th>F 累</th><th>U 累</th></tr></thead>
+          <tbody>
+          ${c.rows.map(r=>`<tr class="${r.w>1?'wt':''}"><td class="rd">${r.n}</td>
+            <td><select class="i_f" data-m="${m.key}" data-i="${r.n-1}">${selOpts(r.f)}</select></td>
+            <td><select class="i_u" data-m="${m.key}" data-i="${r.n-1}">${selOpts(r.u)}</select></td>
+            <td>${r.fp===''?'—':r.fp}</td><td>${r.up===''?'—':r.up}</td><td>×${r.w}</td>
+            <td><b style="color:var(--green)">${r.fcum===''?'—':r.fcum}</b></td>
+            <td><b style="color:var(--gold)">${r.ucum===''?'—':r.ucum}</b></td></tr>`).join('')}
+          <tr class="tot"><td>合計</td><td></td><td></td><td></td><td></td><td></td><td>${c.ftot}</td><td>${c.utot}</td></tr>
+          </tbody>
+        </table></div>
+        <div>${lineChart([{name:fG,color:'#2E7D4F',pts:fCum},{name:uG,color:'#B4903A',pts:uCum}],{defect:c.defect})}
+          ${legend([{name:fG+' 累計',color:'#2E7D4F'},{name:uG+' 累計',color:'#B4903A'}])}</div>
+      </div>
+    </div>`;}).join('')}
+  </div>`;
+  document.getElementById('btnLogout').onclick=()=>{authed=false;try{sessionStorage.removeItem('twt_authed');}catch(e){}renderInstructor();};
+  const pwbox=document.getElementById('pwbox');
+  document.getElementById('btnPw').onclick=()=>{pwbox.style.display=pwbox.style.display==='none'?'block':'none';};
+  document.getElementById('pw_save').onclick=()=>{const o=document.getElementById('pw_old').value,n=document.getElementById('pw_new').value,err=document.getElementById('pw_err');
+    if(hashpw(o)!==getHash()){err.style.color='var(--self)';err.textContent='目前密碼不正確。';return;}
+    if(!n||n.length<4){err.style.color='var(--self)';err.textContent='新密碼至少 4 碼。';return;}
+    try{localStorage.setItem('twt_pwhash',hashpw(n));}catch(e){}
+    err.style.color='var(--coop)';err.textContent='已更新，下次登入請用新密碼。';document.getElementById('pw_old').value='';document.getElementById('pw_new').value='';};
+  el.querySelectorAll('.i_f').forEach(s=>s.onchange=e=>{state.rounds[e.target.dataset.m][+e.target.dataset.i].f=e.target.value;save();renderInstructor();});
+  el.querySelectorAll('.i_u').forEach(s=>s.onchange=e=>{state.rounds[e.target.dataset.m][+e.target.dataset.i].u=e.target.value;save();renderInstructor();});
+}
+function barChart(items){
+  const W=640,H=180,pad={l:38,r:14,t:14,b:34},max=Math.max(242,...items.map(i=>i.v));
+  const bw=(W-pad.l-pad.r)/items.length;let g='';
+  [0,.25,.5,.75,1].forEach(t=>{const y=H-pad.b-(H-pad.t-pad.b)*t;g+=`<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="#EBE5D5"/><text x="${pad.l-6}" y="${y+4}" font-size="11" fill="#9a9683" text-anchor="end">${Math.round(max*t)}</text>`;});
+  const y242=H-pad.b-(H-pad.t-pad.b)*(242/max);g+=`<line x1="${pad.l}" y1="${y242}" x2="${W-pad.r}" y2="${y242}" stroke="#2E7D4F" stroke-dasharray="4 3"/><text x="${W-pad.r}" y="${y242-4}" font-size="10" fill="#2E7D4F" text-anchor="end">全程共好 242</text>`;
+  items.forEach((it,i)=>{const h=(H-pad.t-pad.b)*(it.v/max),x=pad.l+bw*i+bw*0.24,w=bw*0.52,yy=H-pad.b-h;
+    g+=`<rect x="${x}" y="${yy}" width="${w}" height="${h}" rx="4" fill="var(--green)"/><text x="${x+w/2}" y="${yy-5}" font-size="12" fill="#28281f" text-anchor="middle" font-weight="700">${it.v||''}</text><text x="${x+w/2}" y="${H-12}" font-size="12" fill="#5c5a4e" text-anchor="middle">${it.name}</text>`;});
+  return `<div class="chartwrap"><svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${g}</svg></div>`;
+}
+
+/* ---------- HELP ---------- */
+function renderHelp(){document.getElementById('view-help').innerHTML=`
+  <div class="card help">
+    <h3>使用說明</h3>
+    <h4>這是什麼</h4>
+    <p>〈照護量能的每月抉擇〉八回合合作賽局的計分工具。兩個相鄰護理單位（F、U）每回合各選一種協作投入等級；分數依收益矩陣自動計算，第 4 回合 ×2、第 8 回合 ×3。</p>
+    <h4>學員作答</h4>
+    <p>選好『大組（A／B／C）』與『我方座位（F／U）』，勾選你和對手各是第幾組，再逐回合填選擇。上方即時顯示你的加權累計分數與趨勢圖，紅色虛線標出首次脫離共好（背叛）的回合。</p>
+    <h4>講師儀表板</h4>
+    <p>需以講師帳號登入（預設 <code>admin</code> / <code>1234</code>，密碼以雜湊儲存、非明文；登入後可在儀表板『變更密碼』）。登入後三大組並列，卡片標題顯示各大組由哪兩組組成（例如 A大組：第1組 vs 第3組），每回合 F／U 選擇、點數、累計一目了然，附趨勢圖與『共創總價值』長條圖。</p>
+    <h4>資料怎麼流動</h4>
+    <p>資料存在這台裝置的瀏覽器裡，同一瀏覽器的分頁會即時同步。<b>換裝置不會自動同步</b>——最單純的用法是每組用一台裝置作答、或講師這台統一登錄。要跨手機即時匯總，改用連動 Google 表單版。</p>
+    <h4>收益矩陣（右上 U、左下 F）</h4>
+    <table style="max-width:520px"><thead><tr><th>F↓ / U→</th><th>全力共援</th><th>保留一手</th><th>優先自保</th></tr></thead>
+      <tbody><tr><td class="rd">全力共援</td><td>U11 / F11</td><td>U18 / F2</td><td>U15 / F2</td></tr>
+      <tr><td class="rd">保留一手</td><td>U2 / F18</td><td>U8 / F8</td><td>U15 / F3</td></tr>
+      <tr><td class="rd">優先自保</td><td>U2 / F15</td><td>U3 / F15</td><td>U5 / F5</td></tr></tbody></table>
+  </div>`;}
+
+/* ---------- shell ---------- */
+const TITLES={student:['學員作答','照護量能的每月抉擇 ｜ 八回合合作賽局'],instructor:['講師儀表板','各大組協作歷程一覽'],help:['使用說明','工具說明與收益矩陣']};
+function setView(v){ui.view=v;
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
+  ['student','instructor','help'].forEach(k=>document.getElementById('view-'+k).style.display=(k===v?'block':'none'));
+  document.getElementById('pgTitle').textContent=TITLES[v][0];document.getElementById('pgSub').textContent=TITLES[v][1];
+  renderAll();
+}
+function renderAll(){if(ui.view==='student')renderStudent();else if(ui.view==='instructor')renderInstructor();else renderHelp();}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+document.getElementById('btnReset').onclick=()=>{if(confirm('確定要清除全部三大組的資料嗎？此動作無法復原。')){state=blankState();save();renderAll();}};
+setView('student');
+</script>
+</body>
+</html>

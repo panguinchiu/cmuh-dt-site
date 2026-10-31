@@ -1,0 +1,25 @@
+# deps / build
+node_modules/
+.next/
+dist/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# env & secrets
+.env
+.env.*
+!.env.example
+.seed-output.local.txt
+
+# local storage emulator
+azurite/
+.azurite/
+__blobstorage__/
+__queuestorage__/
+__azurite_db_*.json
+
+# misc
+.DS_Store
+*.log
