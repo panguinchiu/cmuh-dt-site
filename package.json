@@ -17,7 +17,9 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "azurite": "azurite-blob --blobHost 127.0.0.1 --blobPort 10000 --location .azurite --silent --loose --skipApiVersionCheck",
-    "postinstall": "prisma generate && node scripts/copy-excalidraw-assets.mjs"
+    "postinstall": "prisma generate && node scripts/copy-excalidraw-assets.mjs",
+    "seed:prod": "node dist/seed.js",
+    "dev:azurite": "npm run azurite"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.34.0",
@@ -27,6 +29,7 @@
     "fflate": "^0.8.3",
     "next": "^16.4.3",
     "pdf-lib": "^1.17.1",
+    "prisma": "^6.19.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "ws": "^8.22.0",
@@ -42,7 +45,6 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.3",
     "playwright": "^1.64.1",
-    "prisma": "^6.19.3",
     "tsx": "^4.23.15",
     "typescript": "5.9",
     "vitest": "^4.1.12"
