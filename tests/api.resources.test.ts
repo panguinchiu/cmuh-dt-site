@@ -13,7 +13,15 @@ let f: Awaited<ReturnType<typeof seedFixture>>;
 let s1: string, s2: string, ins: string;
 const R: Record<string, string> = {};
 
-async function mk(title: string, visibility: "all_students" | "groups" | "users" | "instructors_only", extra: { groupIds?: string[]; userIds?: string[]; type?: "file" | "html_game" } = {}) {
+async function mk(
+  title: string,
+  visibility: "all_students" | "groups" | "users" | "instructors_only",
+  extra: {
+    groupIds?: string[];
+    userIds?: string[];
+    type?: "file" | "html_game";
+  } = {},
+) {
   const r = await db.resource.create({
     data: {
       title,
@@ -21,7 +29,9 @@ async function mk(title: string, visibility: "all_students" | "groups" | "users"
       blobKey: extra.type === "html_game" ? "games/test" : "files/test",
       fileName: `${title}.pdf`,
       visibility,
-      groups: { create: (extra.groupIds ?? []).map((groupId) => ({ groupId })) },
+      groups: {
+        create: (extra.groupIds ?? []).map((groupId) => ({ groupId })),
+      },
       users: { create: (extra.userIds ?? []).map((userId) => ({ userId })) },
     },
   });
@@ -40,7 +50,13 @@ beforeAll(async () => {
   await mk("遊戲一組", "groups", { groupIds: [f.g1.id], type: "html_game" });
 });
 
-const titles = async (cookie: string) => ((await (await list.GET(req("/api/resources", { cookie }))).json()).resources as { title: string }[]).map((r) => r.title).sort();
+const titles = async (cookie: string) =>
+  (
+    (await (await list.GET(req("/api/resources", { cookie }))).json())
+      .resources as { title: string }[]
+  )
+    .map((r) => r.title)
+    .sort();
 
 describe("資源列表：可見範圍伺服器端過濾", () => {
   it("未登入 401", async () => {
@@ -52,22 +68,206 @@ describe("資源列表：可見範圍伺服器端過濾", () => {
     expect(await titles(ins)).toHaveLength(5);
   });
   it("學員回應不含可見範圍設定（visibility/groupIds/userIds）", async () => {
-    const body = await (await list.GET(req("/api/resources", { cookie: s1 }))).json();
+    const body = await (
+      await list.GET(req("/api/resources", { cookie: s1 }))
+    ).json();
     expect(body.resources[0]).not.toHaveProperty("visibility");
     expect(body.resources[0]).not.toHaveProperty("userIds");
   });
-  it("學員不能新增/修改/刪除資源", async () => {
-    expect((await list.POST(req("/api/resources", { method: "POST", cookie: s1, body: { type: "link", url: "https://example.com", title: "x", visibility: "all_students" } }))).status).toBe(403);
+  it("學員不能修改/刪除別人上傳的資源；看不到的回 404", async () => {
     const id = R["全體"];
-    expect((await item.PATCH(req("/x", { method: "PATCH", cookie: s1, body: { title: "改", visibility: "all_students" } }), params({ id }))).status).toBe(403);
-    expect((await item.DELETE(req("/x", { method: "DELETE", cookie: s1 }), params({ id }))).status).toBe(403);
+    expect(
+      (
+        await item.PATCH(
+          req("/x", {
+            method: "PATCH",
+            cookie: s1,
+            body: { title: "改", visibility: "all_students" },
+          }),
+          params({ id }),
+        )
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await item.DELETE(
+          req("/x", { method: "DELETE", cookie: s1 }),
+          params({ id }),
+        )
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await item.DELETE(
+          req("/x", { method: "DELETE", cookie: s1 }),
+          params({ id: R["講師限定"] }),
+        )
+      ).status,
+    ).toBe(404);
+  });
+  it("學員可上傳：可見範圍只能全體學員／自己這組／僅講師", async () => {
+    const post = (body: object) =>
+      list.POST(
+        req("/x", {
+          method: "POST",
+          cookie: s1,
+          body: { type: "link", url: "https://example.com/s", ...body },
+        }),
+      );
+    expect(
+      (
+        await post({
+          title: "指定別組",
+          visibility: "groups",
+          groupIds: [f.g2.id],
+        })
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await post({
+          title: "指定個人",
+          visibility: "users",
+          userIds: [f.s2.id],
+        })
+      ).status,
+    ).toBe(403);
+    const own = await post({
+      title: "甲組分享",
+      visibility: "groups",
+      groupIds: [f.g1.id],
+    });
+    expect(own.status).toBe(201);
+    const ownBody = await own.json();
+    expect(ownBody).toMatchObject({
+      mine: true,
+      canEdit: true,
+      visibility: "groups",
+    });
+    expect(await titles(s1)).toContain("甲組分享");
+    expect(await titles(s2)).not.toContain("甲組分享");
+    expect(await titles(ins)).toContain("甲組分享");
+    expect(
+      (await post({ title: "給講師", visibility: "instructors_only" })).status,
+    ).toBe(201);
+    expect(await titles(s1)).toContain("給講師");
+    expect(await titles(s2)).not.toContain("給講師");
+    // 其他學員看到的列表不含可見範圍設定、不可編輯
+    const all = await (
+      await post({ title: "全體分享", visibility: "all_students" })
+    ).json();
+    const seen = (
+      (await (await list.GET(req("/x", { cookie: s2 }))).json())
+        .resources as Record<string, unknown>[]
+    ).find((r) => r.id === all.id)!;
+    expect(seen).toMatchObject({ mine: false, canEdit: false });
+    expect(seen).not.toHaveProperty("visibility");
+    // 別人不能改/刪；自己可以改、不能改成別組；講師可以刪
+    expect(
+      (
+        await item.PATCH(
+          req("/x", {
+            method: "PATCH",
+            cookie: s2,
+            body: { title: "亂改", visibility: "all_students" },
+          }),
+          params({ id: all.id }),
+        )
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await item.PATCH(
+          req("/x", {
+            method: "PATCH",
+            cookie: s1,
+            body: {
+              title: "改到別組",
+              visibility: "groups",
+              groupIds: [f.g2.id],
+            },
+          }),
+          params({ id: all.id }),
+        )
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await item.PATCH(
+          req("/x", {
+            method: "PATCH",
+            cookie: s1,
+            body: { title: "全體分享2", visibility: "all_students" },
+          }),
+          params({ id: all.id }),
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await item.DELETE(
+          req("/x", { method: "DELETE", cookie: s2 }),
+          params({ id: all.id }),
+        )
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await item.DELETE(
+          req("/x", { method: "DELETE", cookie: s1 }),
+          params({ id: ownBody.id }),
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await item.DELETE(
+          req("/x", { method: "DELETE", cookie: ins }),
+          params({ id: all.id }),
+        )
+      ).status,
+    ).toBe(200);
   });
   it("講師新增連結：只收 http/https；groups 範圍需選組別", async () => {
-    const bad = await list.POST(req("/x", { method: "POST", cookie: ins, body: { type: "link", url: "javascript:alert(1)", title: "x", visibility: "all_students" } }));
+    const bad = await list.POST(
+      req("/x", {
+        method: "POST",
+        cookie: ins,
+        body: {
+          type: "link",
+          url: "javascript:alert(1)",
+          title: "x",
+          visibility: "all_students",
+        },
+      }),
+    );
     expect(bad.status).toBe(400);
-    const noGroup = await list.POST(req("/x", { method: "POST", cookie: ins, body: { type: "link", url: "https://example.com", title: "x", visibility: "groups" } }));
+    const noGroup = await list.POST(
+      req("/x", {
+        method: "POST",
+        cookie: ins,
+        body: {
+          type: "link",
+          url: "https://example.com",
+          title: "x",
+          visibility: "groups",
+        },
+      }),
+    );
     expect(noGroup.status).toBe(400);
-    const ok = await list.POST(req("/x", { method: "POST", cookie: ins, body: { type: "link", url: "https://example.com/game", title: "外部遊戲", visibility: "groups", groupIds: [f.g2.id] } }));
+    const ok = await list.POST(
+      req("/x", {
+        method: "POST",
+        cookie: ins,
+        body: {
+          type: "link",
+          url: "https://example.com/game",
+          title: "外部遊戲",
+          visibility: "groups",
+          groupIds: [f.g2.id],
+        },
+      }),
+    );
     expect(ok.status).toBe(201);
     expect(await titles(s2)).toContain("外部遊戲");
     expect(await titles(s1)).not.toContain("外部遊戲");
@@ -75,12 +275,18 @@ describe("資源列表：可見範圍伺服器端過濾", () => {
 });
 
 describe("下載：伺服器驗權 + 短效 SAS", () => {
-  const dl = (cookie: string | undefined, id: string) => download.GET(req(`/api/resources/${id}/download`, { cookie }), params({ id }));
+  const dl = (cookie: string | undefined, id: string) =>
+    download.GET(
+      req(`/api/resources/${id}/download`, { cookie }),
+      params({ id }),
+    );
   it("不可見資源回 404（不洩漏存在），與不存在相同", async () => {
     expect((await dl(s2, R["第一組限定"])).status).toBe(404);
     expect((await dl(s1, R["講師限定"])).status).toBe(404);
     expect((await dl(s1, R["學員乙限定"])).status).toBe(404);
-    expect((await dl(s1, "00000000-0000-4000-8000-000000000000")).status).toBe(404);
+    expect((await dl(s1, "00000000-0000-4000-8000-000000000000")).status).toBe(
+      404,
+    );
     expect((await dl(undefined, R["全體"])).status).toBe(401);
   });
   it("可見資源 302 到 5 分鐘唯讀 SAS，並指定下載檔名", async () => {
@@ -93,34 +299,60 @@ describe("下載：伺服器驗權 + 短效 SAS", () => {
     const ttl = new Date(u.searchParams.get("se")!).getTime() - Date.now();
     expect(ttl).toBeGreaterThan(4 * 60_000);
     expect(ttl).toBeLessThanOrEqual(5 * 60_000 + 1000);
-    expect(decodeURIComponent(u.searchParams.get("rscd")!)).toContain("attachment");
+    expect(decodeURIComponent(u.searchParams.get("rscd")!)).toContain(
+      "attachment",
+    );
   });
 });
 
 describe("HTML 遊戲隔離", () => {
   it("play-url 只給看得到的人", async () => {
     const id = R["遊戲一組"];
-    expect((await playUrlRoute.GET(req("/x", { cookie: s2 }), params({ id }))).status).toBe(404);
-    const ok = await playUrlRoute.GET(req("/x", { cookie: s1 }), params({ id }));
+    expect(
+      (await playUrlRoute.GET(req("/x", { cookie: s2 }), params({ id })))
+        .status,
+    ).toBe(404);
+    const ok = await playUrlRoute.GET(
+      req("/x", { cookie: s1 }),
+      params({ id }),
+    );
     expect(ok.status).toBe(200);
-    expect((await ok.json()).url).toMatch(new RegExp(`^/play/${id}/[^/]+/index.html$`));
+    expect((await ok.json()).url).toMatch(
+      new RegExp(`^/play/${id}/[^/]+/index.html$`),
+    );
   });
   it("token：竄改、過期、換資源都無效", () => {
     const t = makePlayToken("r1", "u1");
     expect(readPlayToken(t, "r1")).toEqual({ userId: "u1" });
     expect(readPlayToken(t, "r2")).toBeNull();
     expect(readPlayToken(t.slice(0, -2) + "xx", "r1")).toBeNull();
-    expect(readPlayToken(makePlayToken("r1", "u1", Date.now() - 4 * 3600_000), "r1")).toBeNull();
+    expect(
+      readPlayToken(makePlayToken("r1", "u1", Date.now() - 4 * 3600_000), "r1"),
+    ).toBeNull();
   });
   it("無效 token、或 token 主人已看不到資源 → 404，且帶 sandbox CSP、不帶 Set-Cookie", async () => {
     const id = R["遊戲一組"];
-    const bad = await play.GET(req(`/play/${id}/x/index.html`), params({ id, token: "x", path: ["index.html"] }));
+    const bad = await play.GET(
+      req(`/play/${id}/x/index.html`),
+      params({ id, token: "x", path: ["index.html"] }),
+    );
     expect(bad.status).toBe(404);
-    expect(bad.headers.get("content-security-policy")).toContain("sandbox allow-scripts");
-    expect(bad.headers.get("content-security-policy")).not.toContain("allow-same-origin");
+    expect(bad.headers.get("content-security-policy")).toContain(
+      "sandbox allow-scripts",
+    );
+    expect(bad.headers.get("content-security-policy")).not.toContain(
+      "allow-same-origin",
+    );
     expect(bad.headers.get("set-cookie")).toBeNull();
     const t2 = makePlayToken(id, f.s2.id); // 學員乙不在第一組
-    expect((await play.GET(req("/x"), params({ id, token: t2, path: ["index.html"] }))).status).toBe(404);
+    expect(
+      (
+        await play.GET(
+          req("/x"),
+          params({ id, token: t2, path: ["index.html"] }),
+        )
+      ).status,
+    ).toBe(404);
   });
   it("zip 路徑過濾", () => {
     expect(safePath("index.html")).toBe("index.html");

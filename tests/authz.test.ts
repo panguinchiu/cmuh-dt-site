@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   canEditBoard,
+  canManageResource,
+  canSetResourceVisibility,
   canSubmitGameRound,
   canViewGameDashboard,
   canViewMatch,
@@ -13,12 +15,38 @@ import {
 } from "@/lib/authz";
 import { HttpError } from "@/lib/http";
 
-const G1 = "g1", G2 = "g2", G3 = "g3";
-const s1: SessionUser = { id: "u1", name: "學員一", role: "student", groupId: G1 };
-const s2: SessionUser = { id: "u2", name: "學員二", role: "student", groupId: G2 };
-const s3: SessionUser = { id: "u3", name: "學員三", role: "student", groupId: G3 };
-const ins: SessionUser = { id: "i1", name: "講師", role: "instructor", groupId: null };
-const res = (v: ResourceRef["visibility"], groupIds: string[] = [], userIds: string[] = []): ResourceRef => ({ visibility: v, groupIds, userIds });
+const G1 = "g1",
+  G2 = "g2",
+  G3 = "g3";
+const s1: SessionUser = {
+  id: "u1",
+  name: "學員一",
+  role: "student",
+  groupId: G1,
+};
+const s2: SessionUser = {
+  id: "u2",
+  name: "學員二",
+  role: "student",
+  groupId: G2,
+};
+const s3: SessionUser = {
+  id: "u3",
+  name: "學員三",
+  role: "student",
+  groupId: G3,
+};
+const ins: SessionUser = {
+  id: "i1",
+  name: "講師",
+  role: "instructor",
+  groupId: null,
+};
+const res = (
+  v: ResourceRef["visibility"],
+  groupIds: string[] = [],
+  userIds: string[] = [],
+): ResourceRef => ({ visibility: v, groupIds, userIds });
 
 describe("requireUser / requireInstructor", () => {
   it("未登入一律 401", () => {
@@ -77,16 +105,68 @@ describe("canViewResource", () => {
     const r = res("users", [], ["u2"]);
     expect(canViewResource(s2, r)).toBe(true);
     expect(canViewResource(s1, r)).toBe(false);
-    expect(canViewResource({ id: "u9", name: "同組", role: "student", groupId: G2 }, r)).toBe(false);
+    expect(
+      canViewResource(
+        { id: "u9", name: "同組", role: "student", groupId: G2 },
+        r,
+      ),
+    ).toBe(false);
   });
   it("instructors_only：學員一律看不到", () => {
     expect(canViewResource(s1, res("instructors_only"))).toBe(false);
   });
   it("講師永遠看得到全部", () => {
-    for (const v of ["all_students", "groups", "users", "instructors_only"] as const) expect(canViewResource(ins, res(v))).toBe(true);
+    for (const v of [
+      "all_students",
+      "groups",
+      "users",
+      "instructors_only",
+    ] as const)
+      expect(canViewResource(ins, res(v))).toBe(true);
   });
   it("未登入 → 拒絕", () => {
     expect(canViewResource(null, res("all_students"))).toBe(false);
+  });
+});
+
+describe("學員上傳資源", () => {
+  it("上傳者永遠看得到自己上傳的（即使設為僅講師）", () => {
+    expect(
+      canViewResource(s1, { ...res("instructors_only"), createdById: "u1" }),
+    ).toBe(true);
+    expect(
+      canViewResource(s2, { ...res("instructors_only"), createdById: "u1" }),
+    ).toBe(false);
+  });
+  it("學員可設的可見範圍：全體學員、僅講師、只給自己這組", () => {
+    expect(canSetResourceVisibility(s1, res("all_students"))).toBe(true);
+    expect(canSetResourceVisibility(s1, res("instructors_only"))).toBe(true);
+    expect(canSetResourceVisibility(s1, res("groups", [G1]))).toBe(true);
+    expect(canSetResourceVisibility(s1, res("groups", [G2]))).toBe(false);
+    expect(canSetResourceVisibility(s1, res("groups", [G1, G2]))).toBe(false);
+    expect(canSetResourceVisibility(s1, res("groups", []))).toBe(false);
+    expect(canSetResourceVisibility(s1, res("users", [], ["u2"]))).toBe(false);
+    expect(
+      canSetResourceVisibility({ ...s1, groupId: null }, res("groups", [G1])),
+    ).toBe(false);
+    expect(canSetResourceVisibility(null, res("all_students"))).toBe(false);
+  });
+  it("講師可設任何可見範圍", () => {
+    for (const v of [
+      "all_students",
+      "groups",
+      "users",
+      "instructors_only",
+    ] as const)
+      expect(canSetResourceVisibility(ins, res(v, [G2], ["u2"]))).toBe(true);
+  });
+  it("編輯/刪除：講師全部，學員只限自己上傳的", () => {
+    expect(canManageResource(ins, { createdById: "u1" })).toBe(true);
+    expect(canManageResource(ins, { createdById: null })).toBe(true);
+    expect(canManageResource(s1, { createdById: "u1" })).toBe(true);
+    expect(canManageResource(s2, { createdById: "u1" })).toBe(false);
+    expect(canManageResource(s1, { createdById: null })).toBe(false);
+    expect(canManageResource(null, { createdById: "u1" })).toBe(false);
   });
 });
 
